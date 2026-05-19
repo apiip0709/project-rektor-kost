@@ -8,13 +8,13 @@
 </head>
 <body class="bg-background text-neutral font-sans min-h-screen flex flex-col">
 
-    @include('components.navbar')
+    @include('visitor.components.navbar')
 
     <main class="flex-grow container mx-auto px-4 py-6">
         @yield('content')
     </main>
 
-    @include('components.footer')
+    @include('visitor.components.footer')
 
 </body>
 </html>

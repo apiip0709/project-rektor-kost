@@ -64,13 +64,13 @@
     ];
 @endphp
 
-@extends('layouts.app')
+@extends('visitor.layouts.app')
 
 @section('content')
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
 
         <div>
-            <h1 class="text-2xl font-black text-primary">Cari Properti</h1>
+            <h1 class="text-2xl font-black text-primary">Cari Kost</h1>
             <p class="text-xs text-gray-500 mt-1">Radius: <span class="font-semibold text-neutral">Sekitar Pintu 1 Unhas
                     (2km)</span></p>
         </div>
@@ -100,7 +100,7 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         @foreach ($daftarKost as $kost)
-            @include('components.card-kost', ['kost' => $kost])
+            @include('visitor.components.card-kost', ['kost' => $kost])
         @endforeach
     </div>
 @endsection

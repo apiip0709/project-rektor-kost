@@ -5,12 +5,22 @@ use App\Http\Controllers\Auth\loginController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('home.welcome');
+    return view('visitor.pages.welcome');
 });
 
 Route::get('/kost/{id}', function ($id) {
-    return view('home.detail', ['id' => $id]);
+    return view('visitor.pages.detail', ['id' => $id]);
 })->name('kost.detail');
+
+Route::get('/dashboard', function () {
+    return view('owner.pages.dashboard');
+})->name('dashboard');
+Route::get('/kelola-kamar', function () {
+    return view('owner.pages.kelola-room');
+})->name('kelola');
+Route::get('/tambah-kamar', function () {
+    return view('owner.pages.tambah-room');
+})->name('tambah');
 
 Route::get('/login', [loginController::class, 'index'])->name('login');
 Route::post('/loginProcess', [loginController::class, 'login']);

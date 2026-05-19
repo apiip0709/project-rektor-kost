@@ -1,11 +1,9 @@
-@extends('layouts.app')
+@extends('visitor.layouts.app')
 
 @section('content')
 <div class="max-w-7xl mx-auto py-2">
     <div class="flex items-center gap-2 text-xs text-gray-500 mb-4">
         <a href="/" class="hover:text-primary flex items-center gap-1">← Kembali ke Hasil Pencarian</a>
-        <span>/</span>
-        <a href="#" class="hover:text-primary">Tamalanrea</a>
         <span>/</span>
         <span class="text-neutral font-medium">Kost Eksklusif Bintang</span>
     </div>
@@ -39,10 +37,6 @@
                         <span class="bg-gray-100 text-neutral text-[10px] font-bold px-2 py-1 rounded-md border border-gray-200 flex items-center gap-1">🚿 Kamar Mandi Dalam</span>
                         <span class="bg-gray-100 text-neutral text-[10px] font-bold px-2 py-1 rounded-md border border-gray-200 flex items-center gap-1">🅿️ Parkir Luas</span>
                     </div>
-                </div>
-                <div class="flex gap-1.5">
-                    <button class="border border-gray-200 p-2 rounded-lg hover:bg-gray-50 text-xs">🔗</button>
-                    <button class="border border-gray-200 p-2 rounded-lg hover:bg-gray-50 text-xs">🤍</button>
                 </div>
             </div>
 
