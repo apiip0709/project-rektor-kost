@@ -1,42 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Rektor Kost{{ $title }}</title>
-
-  <!-- Google Font: Source Sans Pro -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&amp;display=fallback">
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="{{asset('AdminLTE-3.2.0/plugins/fontawesome-free/css/all.min.css')}}">
-  <!-- icheck bootstrap -->
-  <link rel="stylesheet" href="{{asset('AdminLTE-3.2.0/plugins/icheck-bootstrap/icheck-bootstrap.min.css')}}">
-  <!-- Theme style -->
-  <link rel="stylesheet" href="{{asset('AdminLTE-3.2.0/dist/css/adminlte.min.css')}}">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@yield('title', 'Autentikasi') - Rektor-Kost</title>
+    <!-- Masukkan asset Tailwind CSS Anda di sini -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<!-- Page Second Navigation -->
-<body class="login-page" style="min-height: 496.8px;">
-<div class="login-box">
-  <div class="login-logo">
-    <div class="logo-app">
+<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col justify-between antialiased">
 
-    </div>
-    <a href="/"><b>Rektor</b> Kost</a>
-  </div>
-  <!-- /.login-logo -->
-  @yield('content')
+    <!-- HEADER / LOGO ATAS -->
+    <header class="pt-12 pb-4 flex justify-center">
+        <div class="w-24 h-12 bg-gray-300 rounded-lg flex items-center justify-center text-xs font-bold text-gray-600 tracking-wider">
+              <img src="{{ asset('img/logo.png') }}" alt="Logo Rektor-Kost" class="h-full w-full object-contain">
+          </div>
+    </header>
 
-</div>
-<!-- /.login-box -->
+    <!-- KONTEN UTAMA (Tempat Card Login / Daftar Masuk) -->
+    <main class="flex-1 flex items-center justify-center p-4">
+        @yield('content')
+    </main>
 
-  <!-- jQuery -->
-  <script src="{{ asset ('AdminLTE-3.2.0/plugins/jquery/jquery.min.js')}}"></script>
-  <!-- Bootstrap -->
-  <script src="{{ asset('AdminLTE-3.2.0/plugins/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
-  <!-- AdminLTE App -->
-  <script src="{{ asset ('AdminLTE-3.2.0/dist/js/adminlte.min.js')}}"></script>  
-
+    <!-- FOOTER BAWAH -->
+    <footer class="py-6 border-t border-gray-200 bg-white">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-gray-400 font-medium">
+            &copy; {{ date('Y') }} Rektor-Kost. All rights reserved.
+        </div>
+    </footer>
 
 </body>
 </html>
