@@ -22,7 +22,11 @@
 
         <form action="{{ route('register.process') }}" method="POST" class="space-y-4">
             @csrf
-            <input type="hidden" name="register_method" id="register_method" value="">
+            <input type="hidden" name="register_method" id="register_method" value="{{ old('register_method') }}">
+
+            @error('register_method')
+                <p class="text-xs text-red-500 font-semibold mb-2">{{ $message }}</p>
+            @enderror
 
             <div id="area_tombol_utama" class="space-y-4">
                 <button type="button" id="btn_google" onclick="selectMethod('google')"
@@ -51,46 +55,51 @@
 
                 <div id="kolom_google" class="hidden">
                     <label class="text-xs font-bold text-gray-700 block mb-1.5">No. Telepon</label>
-                    <input type="text" name="phone"
+                    <input type="text" name="phone" id="input_phone" value="{{ old('phone') }}"
                         class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
                         placeholder="Contoh: 0812...">
+                    @error('phone')
+                        <p class="text-[11px] text-red-500 mt-1 font-medium">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div id="kolom_whatsapp" class="hidden">
                     <label class="text-xs font-bold text-gray-700 block mb-1.5">Email</label>
-                    <input type="email" name="email"
+                    <input type="email" name="email" id="input_email" value="{{ old('email') }}"
                         class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
                         placeholder="Contoh: user@gmail.com">
+                    @error('email')
+                        <p class="text-[11px] text-red-500 mt-1 font-medium">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div id="input_bersama" class="space-y-4 hidden">
                     <div>
                         <label class="text-xs font-bold text-gray-700 block mb-1.5">Kata Sandi</label>
                         <div class="flex gap-2">
-                            <input type="password" name="password"
+                            <input type="password" name="password" id="input_password"
                                 class="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
                                 placeholder="*********">
-                            <button type="button" onclick="sendOtp()"
-                                class="bg-[#ffcb42] hover:bg-[#e6b63b] text-gray-950 text-xs font-bold px-4 py-2.5 rounded-xl transition cursor-pointer whitespace-nowrap">
+                            <button type="button" id="btn_send_otp" onclick="sendOtp()"
+                                class="bg-[#ffcb42] hover:bg-[#e6b63b] text-gray-950 text-xs font-bold px-4 py-2.5 rounded-xl transition cursor-pointer whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed">
                                 Kirim OTP
                             </button>
                         </div>
+                        @error('password')
+                            <p class="text-[11px] text-red-500 mt-1 font-medium">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div>
                         <label class="text-xs font-bold text-gray-700 block mb-1.5">Kode OTP</label>
-                        <input type="text" name="otp"
+                        <input type="text" name="otp" value="{{ old('otp') }}"
                             class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
                             placeholder="Masukkan 6 digit kode">
+                        @error('otp')
+                            <p class="text-[11px] text-red-500 mt-1 font-medium">{{ $message }}</p>
+                        @enderror
 
-                        <p id="notif_otp_sukses"
-                            class="hidden mt-1.5 text-[11px] font-semibold text-emerald-600 flex items-center gap-1">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"></path>
-                            </svg>
-                            <span id="teks_notif_otp">Kode OTP berhasil dikirim!</span>
-                        </p>
+                        <p id="notif_otp_sukses" class="hidden mt-1.5 text-[11px] font-semibold flex items-center gap-1"></p>
                     </div>
 
                     <button type="submit"
@@ -117,9 +126,19 @@
     </div>
 
     <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const currentMethod = document.getElementById('register_method').value;
+            if (currentMethod) {
+                selectMethod(currentMethod);
+
+                if (document.getElementsByName('otp')[0].value || "{{ $errors->has('otp') }}") {
+                    showOtpMessage(currentMethod, 'success', 'Sesi login/registrasi dimuat kembali.');
+                }
+            }
+        });
+
         function selectMethod(method) {
             document.getElementById('register_method').value = method;
-
             document.getElementById('input_bersama').classList.remove('hidden');
 
             if (method === 'google') {
@@ -137,25 +156,92 @@
                 document.getElementById('kolom_google').classList.remove('hidden');
                 document.getElementById('kolom_whatsapp').classList.add('hidden');
             }
-
-            // Sembunyikan kembali notifikasi OTP jika pengguna berpindah metode pendaftaran
+            // Sembunyikan notifikasi lama saat ganti metode
             document.getElementById('notif_otp_sukses').classList.add('hidden');
+        }
+
+        function showOtpMessage(type, message) {
+            const targetNotif = document.getElementById('notif_otp_sukses');
+            
+            if (type === 'success') {
+                targetNotif.className = "mt-1.5 text-[11px] font-semibold text-emerald-600 flex items-center gap-1";
+                targetNotif.innerHTML = `
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"></path>
+                    </svg>
+                    <span>${message}</span>`;
+            } else {
+                targetNotif.className = "mt-1.5 text-[11px] font-semibold text-red-500 flex items-center gap-1";
+                targetNotif.innerHTML = `
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"></path>
+                    </svg>
+                    <span>${message}</span>`;
+            }
+            targetNotif.classList.remove('hidden');
         }
 
         function sendOtp() {
             const method = document.getElementById('register_method').value;
-            const targetNotif = document.getElementById('notif_otp_sukses');
-            const targetTeks = document.getElementById('teks_notif_otp');
+            const password = document.getElementById('input_password').value;
+            const email = document.getElementById('input_email').value;
+            const phone = document.getElementById('input_phone').value;
+            const btnSend = document.getElementById('btn_send_otp');
 
-            // Menentukan pesan berdasarkan alur registrasi yang aktif
-            if (method === 'whatsapp') {
-                targetTeks.innerText = 'Kode OTP berhasil dikirim melalui WhatsApp!';
-            } else {
-                targetTeks.innerText = 'Kode OTP berhasil dikirim melalui Email!';
+            if (!method) {
+                alert('Silahkan klik salah satu metode pendaftaran di atas terlebih dahulu.');
+                return;
             }
 
-            // Memunculkan elemen paragraf notifikasi di bawah input OTP
-            targetNotif.classList.remove('hidden');
+            // 1. VALIDASI DI SISI CLIENT (FRONTEND)
+            if (method === 'whatsapp' && !email) {
+                showOtpMessage('error', 'Masukkan nomor telepon Anda terlebih dahulu!');
+                return;
+            }
+            if (method === 'google' && !phone) {
+                showOtpMessage('error', 'Masukkan alamat email Anda terlebih dahulu!');
+                return;
+            }
+            if (!password || password.length < 8) {
+                showOtpMessage('error', 'Kata sandi wajib diisi dan minimal 8 karakter!');
+                return;
+            }
+
+            // Ubah teks tombol menjadi Loading saat request diproses
+            btnSend.disabled = true;
+            btnSend.innerText = 'Mengirim...';
+
+            // 2. REQUEST AJAX MENGGUNAKAN FETCH API KE ROUTE BACKEND
+            // Mengarah ke URL: /register/send-otp (sesuaikan dengan name/endpoint route backend Anda)
+            fetch("{{ url('/register/send-otp') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}" // Token wajib Laravel demi keamanan
+                },
+                body: JSON.stringify({
+                    register_method: method,
+                    email: email,
+                    phone: phone,
+                    password: password
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                btnSend.disabled = false;
+                btnSend.innerText = 'Kirim OTP';
+
+                if (data.success) {
+                    showOtpMessage('success', data.message);
+                } else {
+                    showOtpMessage('error', data.message);
+                }
+            })
+            .catch(error => {
+                btnSend.disabled = false;
+                btnSend.innerText = 'Kirim OTP';
+                showOtpMessage('error', 'Terjadi kesalahan sistem server. Coba beberapa saat lagi.');
+            });
         }
     </script>
 @endsection
