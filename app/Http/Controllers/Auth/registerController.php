@@ -27,8 +27,7 @@ class RegisterController extends Controller
      */
     public function register(Request $request)
     {
-        // 1. Tentukan validasi berdasarkan metode yang dipilih
-        $method = $request->input('register_method'); // 'google' atau 'whatsapp'
+        $method = $request->input('register_method');
 
         $rules = [
             'password' => 'required|string|min:8',
@@ -36,64 +35,67 @@ class RegisterController extends Controller
         ];
 
         if ($method === 'google') {
-            $rules['phone'] = 'required|numeric|unique:users,phone';
-        } elseif ($method === 'whatsapp') {
             $rules['email'] = 'required|email|unique:users,email';
+        } elseif ($method === 'whatsapp') {
+            $rules['phone'] = 'required|numeric|unique:users,phone';
+
+            if ($request->filled('email')) {
+                $rules['email'] = 'nullable|email|unique:users,email';
+            }
         } else {
             return back()->withErrors(['register_method' => 'Silahkan pilih metode pendaftaran terlebih dahulu.']);
         }
 
-        // 2. Jalankan Validasi dengan Pesan Error Bahasa Indonesia
         $request->validate($rules, [
+            'email.required'    => 'Email wajib diisi.',
+            'email.email'       => 'Format email tidak valid.',
+            'email.unique'      => 'Email/Gmail ini sudah terdaftar di sistem. Silakan gunakan email lain atau masuk.',
             'phone.required'    => 'Nomor telepon wajib diisi.',
             'phone.numeric'     => 'Nomor telepon harus berupa angka.',
             'phone.unique'      => 'Nomor telepon ini sudah terdaftar.',
-            'email.required'    => 'Email wajib diisi.',
-            'email.email'       => 'Format email tidak valid.',
-            'email.unique'      => 'Email ini sudah terdaftar.',
             'password.required' => 'Kata sandi wajib diisi.',
             'password.min'      => 'Kata sandi minimal 8 karakter.',
             'otp.required'      => 'Kode OTP wajib diisi.',
             'otp.size'          => 'Kode OTP harus berjumlah 6 digit.',
         ]);
 
-        // 2.5 VALIDASI OTP DARI SESSION
-        // Mengambil kode OTP yang sebelumnya disimpan di session saat tombol "Kirim OTP" diklik
         $sessionOtp = session('generated_otp');
-        
+
         if (!$sessionOtp || $request->input('otp') !== $sessionOtp) {
             return back()->withErrors(['otp' => 'Kode OTP yang Anda masukkan salah atau telah kedaluwarsa.'])->withInput();
         }
 
-        // 3. Simpan Data ke Database (Tabel Users) jika OTP Benar
-        $user = User::create([
-            'email'           => $request->input('email'),
-            'phone'           => $request->input('phone'),
+        if ($method === 'google' && $request->filled('email')) {
+            // Memotong email sebelum tanda '@'. Contoh: afifalhaq777@gmail.com -> afifalhaq777
+            $generatedName = strstr($request->input('email'), '@', true);
+        } else {
+            // Jika lewat WhatsApp, buat nama default menggunakan potongan nomor telepon
+            $generatedName = 'User-' . substr($request->input('phone'), -4); // Contoh: User-8123
+        }
+
+        User::create([
+            'name'            => $generatedName,
+            'email'           => $request->filled('email') ? $request->input('email') : null,
+            'phone'           => $request->filled('phone') ? $request->input('phone') : null,
             'password'        => Hash::make($request->input('password')),
             'register_method' => $method,
-            'role'            => 'pencari',
+            'role'            => 'pengguna',
         ]);
 
-        // Hapus OTP dari session setelah sukses digunakan agar tidak bisa dipakai ulang
         session()->forget('generated_otp');
-
-        // 4. Otomatis Login setelah Berhasil Daftar
-        Auth::login($user);
-
-        // 5. Alihkan ke halaman utama / dashboard aplikasi
-        return redirect('/dashboard')->with('success', 'Akun Anda berhasil didaftarkan!');
+        return redirect()->route('login')->with('success', 'Akun Anda berhasil didaftarkan! Silakan masuk.');
     }
 
     /**
-     * Handle Request AJAX / Interaksi tombol untuk Kirim OTP (Penunjang)
+     * Handle Request AJAX / Interaksi tombol untuk Kirim OTP
      */
     public function sendOtp(Request $request)
     {
         $method = $request->input('register_method');
 
-        // 1. Validasi input identitas sebelum mengirim OTP agar tidak sia-sia
-        if ($method === 'whatsapp') {
-            // Jika daftar lewat WA, input dinamis yang muncul adalah Email
+        // 1. SINKRONISASI LOGIKA VALIDASI SEBELUM KIRIM OTP
+        if ($method === 'google') {
+            // Jalur Google wajib pakai Gmail
             $validator = Validator::make($request->all(), [
                 'email' => 'required|email|unique:users,email'
             ], [
@@ -102,7 +104,7 @@ class RegisterController extends Controller
                 'email.unique'   => 'Email ini sudah terdaftar.'
             ]);
         } else {
-            // Jika daftar lewat Google, input dinamis yang muncul adalah No Telepon
+            // Jalur WhatsApp wajib pakai nomor HP
             $validator = Validator::make($request->all(), [
                 'phone' => 'required|numeric|unique:users,phone'
             ], [
@@ -112,6 +114,7 @@ class RegisterController extends Controller
             ]);
         }
 
+        // Gagal validasi langsung di-return di awal (Early Return Pattern)
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
@@ -121,33 +124,53 @@ class RegisterController extends Controller
 
         // 2. Generate 6 digit angka acak
         $otpCode = (string) rand(100000, 999999);
-
-        // 3. Simpan ke session aplikasi agar bisa dicek saat submit register nanti
         session(['generated_otp' => $otpCode]);
 
-        // 4. Eksekusi pengiriman berdasarkan metode
-        if ($method === 'whatsapp') {
+        // 3. Buat variabel penampung untuk response data dan status code
+        $responseData = [];
+        $statusCode = 200;
+
+        // 4. SINKRONISASI LOGIKA PENGIRIMAN OTP
+        if ($method === 'google') {
+            // JALUR GOOGLE: KIRIM OTP KE EMAIL (GMAIL)
             try {
-                // Kirim OTP live ke Gmail asli user menggunakan Mailable SendOtpMail
                 Mail::to($request->input('email'))->send(new SendOtpMail($otpCode));
-                
-                return response()->json([
+
+                $responseData = [
                     'success' => true,
                     'message' => 'Kode OTP berhasil dikirim ke email Anda!'
-                ]);
+                ];
             } catch (\Exception $e) {
-                return response()->json([
+                $responseData = [
                     'success' => false,
                     'message' => 'Gagal mengirim email. Pastikan pengaturan SMTP .env sudah benar.'
-                ], 500);
+                ];
+                $statusCode = 500;
             }
         } else {
-            Http::withHeaders(['Authorization' => 'TOKEN'])->post('URL', ['target' => $request->phone, 'message' => $otpCode]);
+            // JALUR WHATSAPP: KIRIM OTP KE WHATSAPP VIA API FONNTE
+            try {
+                Http::withHeaders([
+                    'Authorization' => env('WA_GATEWAY_TOKEN'), // Token diatur di file .env
+                ])->post('https://api.fonnte.com/send', [
+                    'target'  => $request->input('phone'),
+                    'message' => "Kode OTP Rektor Kost Anda adalah: " . $otpCode,
+                ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Kode OTP berhasil dikirim melalui SMS/WhatsApp ke nomor telepon Anda!'
-            ]);
+                $responseData = [
+                    'success' => true,
+                    'message' => 'Kode OTP berhasil dikirim ke WhatsApp Anda!'
+                ];
+            } catch (\Exception $e) {
+                $responseData = [
+                    'success' => false,
+                    'message' => 'Gagal mengirim WhatsApp OTP. Coba lagi beberapa saat.'
+                ];
+                $statusCode = 500;
+            }
         }
+
+        // Hanya ada 1 return utama untuk response data di akhir alur AJAX Fetch
+        return response()->json($responseData, $statusCode);
     }
 }

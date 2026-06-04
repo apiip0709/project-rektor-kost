@@ -20,8 +20,8 @@ class User extends Authenticatable
         'email',
         'phone',
         'password',
-        'register_method', // Harus ada agar bisa disimpan lewat form register
-        'role',            // Harus ada agar role bisa diinput oleh backend
+        'register_method',
+        'role',
     ];
 
     /**

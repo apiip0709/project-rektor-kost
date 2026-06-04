@@ -29,7 +29,7 @@ class LoginController extends Controller
 
         // 2. Deteksi apakah input berupa Email atau Nomor Telepon
         $identity = $request->input('login_identity');
-        
+
         // Memeriksa format, jika berformat email pakai field 'email', jika tidak anggap sebagai 'phone'
         $fieldType = filter_var($identity, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
 
@@ -46,7 +46,7 @@ class LoginController extends Controller
 
             // Alihkan ke halaman dashboard / halaman utama aplikasi Anda
             return redirect()->intended('/dashboard')
-                             ->with('success', 'Selamat datang kembali!');
+                ->with('success', 'Selamat datang kembali!');
         }
 
         // 5. Jika gagal login, kembalikan ke form dengan pesan error
@@ -55,12 +55,28 @@ class LoginController extends Controller
         ])->withInput($request->only('login_identity'));
     }
 
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect()->route('login')->with('success', 'Anda telah berhasil keluar sistem.');
+    }
+
     /**
      * Placeholder Method login Pihak Ketiga (Sesuai kebutuhan route Anda)
      */
-    public function redirectToGoogle() { /* Logika redirect ke Google API */ }
-    public function handleGoogleCallback() { /* Logika callback data Google */ }
-    
-    public function redirectToWhatsApp() { /* Logika redirect ke WA/Gateway API */ }
-    public function handleWhatsAppCallback() { /* Logika callback data WA */ }
+    public function redirectToGoogle()
+    { /* Logika redirect ke Google API */
+    }
+    public function handleGoogleCallback()
+    { /* Logika callback data Google */
+    }
+
+    public function redirectToWhatsApp()
+    { /* Logika redirect ke WA/Gateway API */
+    }
+    public function handleWhatsAppCallback()
+    { /* Logika callback data WA */
+    }
 }

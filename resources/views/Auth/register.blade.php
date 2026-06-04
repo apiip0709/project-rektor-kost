@@ -99,7 +99,8 @@
                             <p class="text-[11px] text-red-500 mt-1 font-medium">{{ $message }}</p>
                         @enderror
 
-                        <p id="notif_otp_sukses" class="hidden mt-1.5 text-[11px] font-semibold flex items-center gap-1"></p>
+                        <p id="notif_otp_sukses" class="hidden mt-1.5 text-[11px] font-semibold flex items-center gap-1">
+                        </p>
                     </div>
 
                     <button type="submit"
@@ -132,7 +133,7 @@
                 selectMethod(currentMethod);
 
                 if (document.getElementsByName('otp')[0].value || "{{ $errors->has('otp') }}") {
-                    showOtpMessage(currentMethod, 'success', 'Sesi login/registrasi dimuat kembali.');
+                    showOtpMessage('success', 'Sesi registrasi dimuat kembali.');
                 }
             }
         });
@@ -142,41 +143,47 @@
             document.getElementById('input_bersama').classList.remove('hidden');
 
             if (method === 'google') {
-                document.getElementById('btn_whatsapp').classList.remove('hidden');
+                // Sembunyikan tombol utama, tampilkan tombol alternatif di bawah teks "ATAU"
                 document.getElementById('btn_google').classList.add('hidden');
-
+                document.getElementById('btn_whatsapp').classList.remove('hidden');
                 document.getElementById('pembatas_atau').classList.remove('hidden');
+
+                // SINKRONISASI: Jika pilih Google, buka kolom Email (Gmail)
                 document.getElementById('kolom_whatsapp').classList.remove('hidden');
                 document.getElementById('kolom_google').classList.add('hidden');
-            } else if (method === 'whatsapp') {
-                document.getElementById('btn_google').classList.remove('hidden');
-                document.getElementById('btn_whatsapp').classList.add('hidden');
 
+            } else if (method === 'whatsapp') {
+                // Sembunyikan tombol utama, tampilkan tombol alternatif di bawah teks "ATAU"
+                document.getElementById('btn_whatsapp').classList.add('hidden');
+                document.getElementById('btn_google').classList.remove('hidden');
                 document.getElementById('pembatas_atau').classList.remove('hidden');
+
+                // SINKRONISASI: Jika pilih WhatsApp, buka kolom No. Telepon
                 document.getElementById('kolom_google').classList.remove('hidden');
                 document.getElementById('kolom_whatsapp').classList.add('hidden');
             }
-            // Sembunyikan notifikasi lama saat ganti metode
+
+            // Bersihkan notifikasi pesan lama saat berganti metode
             document.getElementById('notif_otp_sukses').classList.add('hidden');
         }
 
         function showOtpMessage(type, message) {
             const targetNotif = document.getElementById('notif_otp_sukses');
-            
+
             if (type === 'success') {
                 targetNotif.className = "mt-1.5 text-[11px] font-semibold text-emerald-600 flex items-center gap-1";
                 targetNotif.innerHTML = `
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"></path>
-                    </svg>
-                    <span>${message}</span>`;
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"></path>
+                </svg>
+                <span>${message}</span>`;
             } else {
                 targetNotif.className = "mt-1.5 text-[11px] font-semibold text-red-500 flex items-center gap-1";
                 targetNotif.innerHTML = `
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"></path>
-                    </svg>
-                    <span>${message}</span>`;
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"></path>
+                </svg>
+                <span>${message}</span>`;
             }
             targetNotif.classList.remove('hidden');
         }
@@ -193,13 +200,13 @@
                 return;
             }
 
-            // 1. VALIDASI DI SISI CLIENT (FRONTEND)
-            if (method === 'whatsapp' && !email) {
-                showOtpMessage('error', 'Masukkan nomor telepon Anda terlebih dahulu!');
+            // SINKRONISASI VALIDASI: Menyesuaikan aturan pengecekan variabel dengan input form
+            if (method === 'google' && !email) {
+                showOtpMessage('error', 'Masukkan alamat email Gmail Anda terlebih dahulu!');
                 return;
             }
-            if (method === 'google' && !phone) {
-                showOtpMessage('error', 'Masukkan alamat email Anda terlebih dahulu!');
+            if (method === 'whatsapp' && !phone) {
+                showOtpMessage('error', 'Masukkan nomor telepon WhatsApp Anda terlebih dahulu!');
                 return;
             }
             if (!password || password.length < 8) {
@@ -207,41 +214,38 @@
                 return;
             }
 
-            // Ubah teks tombol menjadi Loading saat request diproses
             btnSend.disabled = true;
             btnSend.innerText = 'Mengirim...';
 
-            // 2. REQUEST AJAX MENGGUNAKAN FETCH API KE ROUTE BACKEND
-            // Mengarah ke URL: /register/send-otp (sesuaikan dengan name/endpoint route backend Anda)
-            fetch("{{ url('/register/send-otp') }}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}" // Token wajib Laravel demi keamanan
-                },
-                body: JSON.stringify({
-                    register_method: method,
-                    email: email,
-                    phone: phone,
-                    password: password
+            fetch("{{ route('register.otp') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify({
+                        register_method: method,
+                        email: email,
+                        phone: phone,
+                        password: password
+                    })
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                btnSend.disabled = false;
-                btnSend.innerText = 'Kirim OTP';
+                .then(response => response.json())
+                .then(data => {
+                    btnSend.disabled = false;
+                    btnSend.innerText = 'Kirim OTP';
 
-                if (data.success) {
-                    showOtpMessage('success', data.message);
-                } else {
-                    showOtpMessage('error', data.message);
-                }
-            })
-            .catch(error => {
-                btnSend.disabled = false;
-                btnSend.innerText = 'Kirim OTP';
-                showOtpMessage('error', 'Terjadi kesalahan sistem server. Coba beberapa saat lagi.');
-            });
+                    if (data.success) {
+                        showOtpMessage('success', data.message);
+                    } else {
+                        showOtpMessage('error', data.message);
+                    }
+                })
+                .catch(error => {
+                    btnSend.disabled = false;
+                    btnSend.innerText = 'Kirim OTP';
+                    showOtpMessage('error', 'Terjadi kesalahan sistem server. Coba beberapa saat lagi.');
+                });
         }
     </script>
 @endsection

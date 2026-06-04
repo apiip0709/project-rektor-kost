@@ -16,7 +16,10 @@
         </div>
 
         <div class="flex items-center gap-4">
-            <a href="#"
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
+                @csrf
+            </form>
+            <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
                 class="inline-flex items-center gap-2 bg-primary text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-opacity-95 transition-all shadow-xs hover:shadow-md transform hover:-translate-y-0.5">
                 <span>Logout</span>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
