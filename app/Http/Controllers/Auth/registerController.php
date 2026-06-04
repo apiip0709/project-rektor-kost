@@ -66,11 +66,10 @@ class RegisterController extends Controller
         }
 
         if ($method === 'google' && $request->filled('email')) {
-            // Memotong email sebelum tanda '@'. Contoh: afifalhaq777@gmail.com -> afifalhaq777
+            // Ambil string sebelum '@' dari Gmail
             $generatedName = strstr($request->input('email'), '@', true);
         } else {
-            // Jika lewat WhatsApp, buat nama default menggunakan potongan nomor telepon
-            $generatedName = 'User-' . substr($request->input('phone'), -4); // Contoh: User-8123
+            $generatedName = 'User-' . substr($request->input('phone'), -4);
         }
 
         User::create([
@@ -132,7 +131,6 @@ class RegisterController extends Controller
 
         // 4. SINKRONISASI LOGIKA PENGIRIMAN OTP
         if ($method === 'google') {
-            // JALUR GOOGLE: KIRIM OTP KE EMAIL (GMAIL)
             try {
                 Mail::to($request->input('email'))->send(new SendOtpMail($otpCode));
 
@@ -150,27 +148,50 @@ class RegisterController extends Controller
         } else {
             // JALUR WHATSAPP: KIRIM OTP KE WHATSAPP VIA API FONNTE
             try {
-                Http::withHeaders([
+                // Ambil nomor telepon dari request
+                $phone = $request->input('phone');
+
+                // FORMATTING OTOMATIS: Mengubah awalan '08' menjadi '62'
+                if (strpos($phone, '0') === 0) {
+                    $phone = '62' . substr($phone, 1);
+                }
+
+                $messageTemplate = "*REKTOR KOST*\n\n" .
+                    "Halo! Kode OTP pendaftaran akun Anda adalah: *{$otpCode}*\n\n" .
+                    "Kode ini hanya berlaku selama 5 menit. Demi keamanan akun Anda, " .
+                    "jangan sebarkan kode ini kepada siapa pun termasuk pihak Rektor Kost.";
+
+                $response = Http::withHeaders([
                     'Authorization' => env('WA_GATEWAY_TOKEN'), // Token diatur di file .env
                 ])->post('https://api.fonnte.com/send', [
-                    'target'  => $request->input('phone'),
-                    'message' => "Kode OTP Rektor Kost Anda adalah: " . $otpCode,
+                    'target'  => $phone,
+                    'message' => $messageTemplate, // 🌟 Diarahkan ke variabel template di atas
                 ]);
 
-                $responseData = [
-                    'success' => true,
-                    'message' => 'Kode OTP berhasil dikirim ke WhatsApp Anda!'
-                ];
+                // CEK RESPONS DARI SERVER FONNTE
+                $result = $response->json();
+
+                if (isset($result['status']) && $result['status'] === false) {
+                    $responseData = [
+                        'success' => false,
+                        'message' => 'Fonnte Gateway Error: ' . ($result['reason'] ?? 'Gagal mengirim pesan.')
+                    ];
+                    $statusCode = 400;
+                } else {
+                    $responseData = [
+                        'success' => true,
+                        'message' => 'Kode OTP berhasil dikirim ke WhatsApp Anda!'
+                    ];
+                }
             } catch (\Exception $e) {
                 $responseData = [
                     'success' => false,
-                    'message' => 'Gagal mengirim WhatsApp OTP. Coba lagi beberapa saat.'
+                    'message' => 'Gagal mengirim WhatsApp OTP. Sistem error: ' . $e->getMessage()
                 ];
                 $statusCode = 500;
             }
         }
 
-        // Hanya ada 1 return utama untuk response data di akhir alur AJAX Fetch
         return response()->json($responseData, $statusCode);
     }
 }
