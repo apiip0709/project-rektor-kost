@@ -29,7 +29,9 @@ class RegisterController extends Controller
     {
         $method = $request->input('register_method');
 
+        // 🌟 Tambahkan 'name' ke aturan validasi dasar karena sekarang sifatnya wajib
         $rules = [
+            'name'     => 'required|string|max:255',
             'password' => 'required|string|min:8',
             'otp'      => 'required|string|size:6',
         ];
@@ -47,6 +49,7 @@ class RegisterController extends Controller
         }
 
         $request->validate($rules, [
+            'name.required'     => 'Nama lengkap wajib diisi.', // 🌟 Pesan error custom untuk nama
             'email.required'    => 'Email wajib diisi.',
             'email.email'       => 'Format email tidak valid.',
             'email.unique'      => 'Email/Gmail ini sudah terdaftar di sistem. Silakan gunakan email lain atau masuk.',
@@ -65,15 +68,10 @@ class RegisterController extends Controller
             return back()->withErrors(['otp' => 'Kode OTP yang Anda masukkan salah atau telah kedaluwarsa.'])->withInput();
         }
 
-        if ($method === 'google' && $request->filled('email')) {
-            // Ambil string sebelum '@' dari Gmail
-            $generatedName = strstr($request->input('email'), '@', true);
-        } else {
-            $generatedName = 'User-' . substr($request->input('phone'), -4);
-        }
+        // 🌟 KODE GENERATE NAME YANG LAMA SUDAH DIHAPUS 🌟
 
         User::create([
-            'name'            => $generatedName,
+            'name'            => $request->input('name'),
             'email'           => $request->filled('email') ? $request->input('email') : null,
             'phone'           => $request->filled('phone') ? $request->input('phone') : null,
             'password'        => Hash::make($request->input('password')),
@@ -85,35 +83,32 @@ class RegisterController extends Controller
         return redirect()->route('login')->with('success', 'Akun Anda berhasil didaftarkan! Silakan masuk.');
     }
 
-    /**
-     * Handle Request AJAX / Interaksi tombol untuk Kirim OTP
-     */
     public function sendOtp(Request $request)
     {
         $method = $request->input('register_method');
 
-        // 1. SINKRONISASI LOGIKA VALIDASI SEBELUM KIRIM OTP
         if ($method === 'google') {
-            // Jalur Google wajib pakai Gmail
             $validator = Validator::make($request->all(), [
+                'name'  => 'required|string|max:255',
                 'email' => 'required|email|unique:users,email'
             ], [
+                'name.required'  => 'Nama lengkap wajib diisi sebelum mengirim OTP.',
                 'email.required' => 'Email wajib diisi sebelum mengirim OTP.',
                 'email.email'    => 'Format email tidak valid.',
                 'email.unique'   => 'Email ini sudah terdaftar.'
             ]);
         } else {
-            // Jalur WhatsApp wajib pakai nomor HP
             $validator = Validator::make($request->all(), [
+                'name'  => 'required|string|max:255',
                 'phone' => 'required|numeric|unique:users,phone'
             ], [
+                'name.required'  => 'Nama lengkap wajib diisi sebelum mengirim OTP.',
                 'phone.required' => 'Nomor telepon wajib diisi sebelum mengirim OTP.',
                 'phone.numeric'  => 'Nomor telepon harus berupa angka.',
                 'phone.unique'   => 'Nomor telepon ini sudah terdaftar.'
             ]);
         }
 
-        // Gagal validasi langsung di-return di awal (Early Return Pattern)
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
@@ -121,11 +116,9 @@ class RegisterController extends Controller
             ], 422);
         }
 
-        // 2. Generate 6 digit angka acak
         $otpCode = (string) rand(100000, 999999);
         session(['generated_otp' => $otpCode]);
 
-        // 3. Buat variabel penampung untuk response data dan status code
         $responseData = [];
         $statusCode = 200;
 
