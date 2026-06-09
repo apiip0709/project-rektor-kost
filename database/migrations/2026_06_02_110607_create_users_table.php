@@ -18,8 +18,9 @@ return new class extends Migration
             $table->string('phone')->unique()->nullable();
             $table->string('password');
             $table->string('register_method')->nullable();
-            $table->enum('role', ['superadmin','pengguna', 'pemilik','admin'])->default('pengguna');
-            
+
+            $table->enum('role', ['superadmin', 'pengguna', 'pemilik', 'teknisi'])->default('pengguna');
+
             $table->rememberToken();
             $table->timestamps();
         });

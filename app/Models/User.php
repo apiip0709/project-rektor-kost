@@ -11,9 +11,8 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
+     * Atribut yang boleh diisi secara massal.
+     * Kolom gender, pob, dan dob telah dihapus karena sudah dikelola oleh model Owner.
      */
     protected $fillable = [
         'name',
@@ -25,9 +24,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
+     * Atribut yang disembunyikan saat konversi ke Array/JSON (Keamanan).
      */
     protected $hidden = [
         'password',
@@ -35,15 +32,21 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Casting tipe data otomatis bawaan Laravel 11/12.
      */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed', // Mengotomatiskan enkripsi password saat create user
+            'password' => 'hashed', // Otomatis Bcrypt saat create/update password
         ];
+    }
+
+    /**
+     * RELASI: Hubungan ke Profil Owner (One-to-One)
+     */
+    public function ownerProfile()
+    {
+        return $this->hasOne(Owner::class, 'user_id', 'id');
     }
 }
