@@ -32,18 +32,17 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [LoginController::class, 'login'])->name('login.process');
 
     // --- FITUR DAFTAR (REGISTER) ---
-    // Sudah cocok 100% dengan Blade dan Controller
     Route::get('/register', [RegisterController::class, 'showRegisterForm'])->name('register');
     Route::post('/register', [RegisterController::class, 'register'])->name('register.process');
     Route::post('/register/send-otp', [RegisterController::class, 'sendOtp'])->name('register.otp');
 
     // --- AUTENTIKASI PIHAK KETIGA (SOSIAL MEDIA) ---
-    Route::get('/auth/google', [LoginController::class, 'redirectToGoogle'])->name('auth.google');
+    Route::get('/auth/google', [LoginController::class, 'redirectToGoogle'])->name('login.google');
     Route::get('/auth/google/callback', [LoginController::class, 'handleGoogleCallback']);
 
-    // Mengantisipasi jika nanti ada integrasi tombol "Daftar/Masuk Langsung dengan WA" tanpa OTP
-    Route::get('/auth/whatsapp', [LoginController::class, 'redirectToWhatsApp'])->name('auth.whatsapp');
-    Route::get('/auth/whatsapp/callback', [LoginController::class, 'handleWhatsAppCallback']);
+    // --- WHATSAPP LOGIN AUTOMATION ---
+    Route::get('/auth/whatsapp/redirect', [LoginController::class, 'redirectToWhatsapp'])->name('login.whatsapp.redirect');
+    Route::get('/auth/whatsapp/callback', [LoginController::class, 'handleWhatsappCallback'])->name('login.whatsapp.callback'); // 🌟 Tambahan Baru
 });
 
 // --- FITUR KELUAR (LOGOUT) ---

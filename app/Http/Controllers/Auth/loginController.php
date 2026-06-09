@@ -7,12 +7,15 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Cache;
 
 class LoginController extends Controller
 {
     public function showLoginForm()
     {
-        return view('Auth.login'); // Pastikan path file blade Anda sesuai (resources/views/Auth/login.blade.php)
+        return view('Auth.login');
     }
 
     public function login(Request $request)
@@ -44,13 +47,12 @@ class LoginController extends Controller
             'password' => $request->input('password'),
         ];
 
-        // 4. Proses Autentikasi ke Guard Laravel
         if (Auth::attempt($credentials, $request->has('remember'))) {
             $request->session()->regenerate();
 
             $user = Auth::user();
 
-            if ($user->role === 'admin') {
+            if ($user->role === 'superadmin' || $user->role === 'admin') {
                 return redirect()->intended(route('admin.dashboard'))
                     ->with('success', 'Selamat datang Admin!');
             }
@@ -73,16 +75,82 @@ class LoginController extends Controller
     }
 
     public function redirectToGoogle()
-    { /* Logika redirect ke Google API */
-    }
-    public function handleGoogleCallback()
-    { /* Logika callback data Google */
+    {
+        $targetUrl = Socialite::driver('google')->redirect()->getTargetUrl();
+        $forcedUrl = $targetUrl . '&prompt=select_account';
+        return redirect()->away($forcedUrl);
     }
 
-    public function redirectToWhatsApp()
-    { /* Logika redirect ke WA/Gateway API */
+    public function handleGoogleCallback()
+    {
+        try {
+            $googleUser = Socialite::driver('google')->user();
+
+            $user = User::where('email', $googleUser->getEmail())->first();
+
+            // 🌟 PERBAIKAN DI SINI: Menggunakan redirect()->route() sebelum memanggil withInput()
+            if (!$user) {
+                return redirect()->route('register')
+                    ->withInput([
+                        'email' => $googleUser->getEmail(),
+                        'name'  => $googleUser->getName()
+                    ])
+                    ->with('error', 'Akun Google Anda belum terdaftar. Silakan lakukan pendaftaran terlebih dahulu.');
+            }
+
+            Auth::login($user);
+            $request = request();
+            $request->session()->regenerate();
+
+            return redirect()->route('home')->with('success', 'Berhasil masuk menggunakan akun Google!');
+        } catch (\Exception $e) {
+            return redirect()->route('login')->withErrors([
+                'login_identity' => 'Gagal melakukan otentikasi menggunakan Google. Silakan coba lagi.',
+            ]);
+        }
     }
-    public function handleWhatsAppCallback()
-    { /* Logika callback data WA */
+
+    public function redirectToWhatsapp()
+    {
+        $verificationCode = 'REKTORKOST-' . strtoupper(Str::random(6));
+
+        Cache::put('wa_login_' . $verificationCode, 'pending', 300);
+
+        $nomorTarget = '6289695096085';
+
+        $pesanTeks = "Halo Rektor Kost, saya ingin masuk ke sistem\n\nKode: " . $verificationCode;
+
+        $urlWhatsapp = "https://wa.me/" . $nomorTarget . "?text=" . urlencode($pesanTeks);
+
+        return redirect()->away($urlWhatsapp);
+    }
+
+    public function handleWhatsappCallback(Request $request)
+    {
+        $phoneFromWa = $request->query('phone');
+
+        if (!$phoneFromWa) {
+            return redirect()->route('login')->with('error', 'Akses verifikasi WhatsApp tidak valid.');
+        }
+
+        $phoneFormatted = $phoneFromWa;
+        if (strpos($phoneFromWa, '62') === 0) {
+            $phoneFormatted = '0' . substr($phoneFromWa, 2);
+        }
+
+        $user = User::where('phone', $phoneFormatted)->first();
+
+        if (!$user) {
+            return redirect()->route('register')
+                ->withInput([
+                    'phone' => $phoneFormatted,
+                    'register_method' => 'whatsapp'
+                ])
+                ->with('error', 'Nomor WhatsApp Anda belum terdaftar. Silakan lakukan pendaftaran terlebih dahulu.');
+        }
+
+        Auth::login($user);
+
+        return redirect()->route('dashboard');
     }
 }

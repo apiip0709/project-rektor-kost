@@ -20,9 +20,21 @@
             <p class="text-xs text-gray-400 max-w-xs mx-auto">Mulai cari kost impianmu dan nikmati berbagai kemudahan.</p>
         </div>
 
+        {{-- 🌟 1. TEMPAT MENAMPILKAN PESAN ERROR DARI GOOGLE CALLBACK --}}
+        @if (session('error'))
+            <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-xl">
+                <p class="text-[11px] text-red-700 font-semibold leading-relaxed">
+                    {{ session('error') }}
+                </p>
+            </div>
+        @endif
+
         <form action="{{ route('register.process') }}" method="POST" class="space-y-4">
             @csrf
-            <input type="hidden" name="register_method" id="register_method" value="{{ old('register_method') }}">
+
+            {{-- 🌟 2. AMBIL DATA DARI FLASH INPUT JIKA REDIRECT DARI GOOGLE CALLBACK --}}
+            <input type="hidden" name="register_method" id="register_method"
+                value="{{ old('register_method', session()->has('error') ? 'google' : '') }}">
 
             @error('register_method')
                 <p class="text-xs text-red-500 font-semibold mb-2">{{ $message }}</p>
@@ -52,6 +64,17 @@
             </div>
 
             <div id="area_input_dinamis" class="space-y-4">
+
+                {{-- 🌟 3. TAMBAHKAN KOLOM NAMA (Google butuh data nama Anda dari redirect) --}}
+                <div id="kolom_nama" class="hidden">
+                    <label class="text-xs font-bold text-gray-700 block mb-1.5">Nama Lengkap</label>
+                    <input type="text" name="name" id="input_name" value="{{ old('name') }}"
+                        class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
+                        placeholder="Masukkan nama lengkap">
+                    @error('name')
+                        <p class="text-[11px] text-red-500 mt-1 font-medium">{{ $message }}</p>
+                    @enderror
+                </div>
 
                 <div id="kolom_google" class="hidden">
                     <label class="text-xs font-bold text-gray-700 block mb-1.5">No. Telepon</label>
@@ -143,27 +166,26 @@
             document.getElementById('input_bersama').classList.remove('hidden');
 
             if (method === 'google') {
-                // Sembunyikan tombol utama, tampilkan tombol alternatif di bawah teks "ATAU"
                 document.getElementById('btn_google').classList.add('hidden');
                 document.getElementById('btn_whatsapp').classList.remove('hidden');
                 document.getElementById('pembatas_atau').classList.remove('hidden');
 
-                // SINKRONISASI: Jika pilih Google, buka kolom Email (Gmail)
+                // Tampilkan kolom nama & email (karena mendaftar lewat data Google)
+                document.getElementById('kolom_nama').classList.remove('hidden');
                 document.getElementById('kolom_whatsapp').classList.remove('hidden');
                 document.getElementById('kolom_google').classList.add('hidden');
 
             } else if (method === 'whatsapp') {
-                // Sembunyikan tombol utama, tampilkan tombol alternatif di bawah teks "ATAU"
                 document.getElementById('btn_whatsapp').classList.add('hidden');
                 document.getElementById('btn_google').classList.remove('hidden');
                 document.getElementById('pembatas_atau').classList.remove('hidden');
 
-                // SINKRONISASI: Jika pilih WhatsApp, buka kolom No. Telepon
+                // Tampilkan kolom No. Telepon saja (kolom nama disembunyikan/diisi manual nanti)
                 document.getElementById('kolom_google').classList.remove('hidden');
+                document.getElementById('kolom_nama').classList.add('hidden');
                 document.getElementById('kolom_whatsapp').classList.add('hidden');
             }
 
-            // Bersihkan notifikasi pesan lama saat berganti metode
             document.getElementById('notif_otp_sukses').classList.add('hidden');
         }
 
@@ -200,7 +222,6 @@
                 return;
             }
 
-            // SINKRONISASI VALIDASI: Menyesuaikan aturan pengecekan variabel dengan input form
             if (method === 'google' && !email) {
                 showOtpMessage('error', 'Masukkan alamat email Gmail Anda terlebih dahulu!');
                 return;
