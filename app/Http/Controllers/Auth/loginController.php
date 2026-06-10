@@ -53,7 +53,7 @@ class LoginController extends Controller
             $user = Auth::user();
 
             if ($user->role === 'superadmin' || $user->role === 'admin') {
-                return redirect()->intended(route('admin.dashboard'))
+                return redirect()->intended(route('superadmin.dashboard'))
                     ->with('success', 'Selamat datang Admin!');
             }
 

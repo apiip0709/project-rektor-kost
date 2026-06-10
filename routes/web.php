@@ -39,13 +39,19 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
     // ─── KELOMPOK ROLE: SUPERADMIN ───
-    // Menghapus 'auth' ganda, menyisakan role:superadmin
-    Route::middleware('role:superadmin')->prefix('superadmin')->name('superadmin.')->group(function () {
-        
+    Route::middleware('role:superadmin')->group(function () {
 
-        Route::resource('user', UserController::class);
-        Route::resource('owner', OwnerController::class);
-        Route::resource('kost', KostController::class);
+        // 🌟 Letakkan di sini jika ingin URL-nya murni /dashboard-admin
+        Route::get('/dashboard-admin', function () {
+            return view('admin.layouts.superadmin');
+        })->name('superadmin.dashboard');
+
+        // Route sisanya tetap pakai prefix agar rapi (/superadmin/user, /superadmin/kost, dll)
+        Route::prefix('superadmin')->name('superadmin.')->group(function () {
+            Route::resource('user', UserController::class);
+            Route::resource('owner', OwnerController::class);
+            Route::resource('kost', KostController::class);
+        });
     });
 
     // ─── KELOMPOK ROLE: TEKNISI (Role baru Anda dari tabel users) ───
@@ -65,7 +71,7 @@ Route::middleware('auth')->group(function () {
         // Menggunakan Controller yang sama dengan Superadmin, tapi URL-nya nanti /owner/kost
         Route::resource('kost', KostController::class);
         // Route::resource('room', RoomController::class);
-        
+
         // Route manual Anda untuk kamar bisa pelan-pelan dialihkan ke Resource di atas agar CRUD-nya otomatis
         Route::get('/kelola-kamar', function () {
             return view('owner.pages.kelola-room');

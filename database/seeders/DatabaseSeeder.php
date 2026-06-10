@@ -23,13 +23,22 @@ class DatabaseSeeder extends Seeder
         DB::table('users')->truncate();
         Schema::enableForeignKeyConstraints();
 
-        // 2. Buat Akun Superadmin sesuai Enum di Migration Anda
+        // ─── 1. AKUN SUPERADMIN (Data Lama Anda) ───
         User::create([
             'name'            => 'Superadmin A5',
             'email'           => 'projectrektor@gmail.com',
-            'password'        => Hash::make('rektoratgagal'),
+            'password'        => 'rektoratgagal',
             'register_method' => 'google',
             'role'            => 'superadmin',
+        ]);
+
+        // ─── 2. TAMBAHAN: AKUN PENGGUNA / PENCARI KOST ───
+        User::create([
+            'name'            => 'Apiip',
+            'email'           => 'afifalhaq777@gmail.com',
+            'password'        => 'apiip777',
+            'register_method' => 'google',
+            'role'            => 'pengguna',
         ]);
     }
 }
