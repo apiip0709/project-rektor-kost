@@ -73,10 +73,17 @@
                                     </td>
                                     <td class="py-4 px-4 text-slate-900">{{ $user->created_at->format('d M Y') }}</td>
                                     <td class="py-4 px-4">
-                                        <a href="{{ route('superadmin.user.edit', $user->user_id) }}"
-                                            class="inline-block px-4 py-1.5 rounded-lg border border-amber-500 text-amber-600 hover:bg-amber-50 transition-colors font-bold text-xs">
-                                            Edit
-                                        </a>
+                                        <div class="flex justify-center items-center gap-2">
+                                            <a href="{{ route('superadmin.user.edit', $user->user_id) }}"
+                                                class="px-3 py-1.5 rounded-lg border border-amber-500 text-amber-600 hover:bg-amber-50 transition-colors font-bold text-xs">
+                                                Edit
+                                            </a>
+                                            <button type="button"
+                                                onclick="openDeleteModal('{{ route('superadmin.user.destroy', $user->user_id) }}')"
+                                                class="px-3 py-1.5 rounded-lg border cursor-pointer border-red-500 text-red-600 hover:bg-red-50 transition-colors font-bold text-xs">
+                                                Hapus
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             @empty
@@ -96,7 +103,38 @@
         </div>
     </div>
 
+    <div id="deleteModal"
+        class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 animate-in fade-in zoom-in duration-200">
+            <h3 class="text-lg font-bold text-slate-900">Konfirmasi Hapus</h3>
+            <p class="text-slate-600 mt-2 text-sm">Apakah Anda yakin ingin menghapus pengguna ini? Tindakan ini tidak dapat
+                dibatalkan.</p>
+            <div class="flex gap-3 mt-6">
+                <button type="button" onclick="closeDeleteModal()"
+                    class="flex-1 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg cursor-pointer text-sm font-bold text-slate-700 transition">Batal</button>
+                <form id="deleteForm" method="POST" class="flex-1">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit"
+                        class="w-full px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg cursor-pointer text-sm font-bold text-white transition">Ya,
+                        Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Modal logic
+        function openDeleteModal(actionUrl) {
+            const modal = document.getElementById('deleteModal');
+            document.getElementById('deleteForm').action = actionUrl;
+            modal.classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+
         // Auto-remove success message
         setTimeout(() => {
             const alert = document.getElementById('success-alert');

@@ -96,11 +96,13 @@ class UserController extends Controller
             ->with('success', 'Data pengguna berhasil diperbarui!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(String $id)
     {
-        //
+        $user = User::where('user_id', $id)->firstOrFail();
+
+        $user->delete();
+
+        return redirect()->route('superadmin.user.index')
+            ->with('success', 'Pengguna berhasil dihapus!');
     }
 }
