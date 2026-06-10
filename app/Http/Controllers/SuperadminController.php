@@ -13,27 +13,23 @@ class SuperadminController extends Controller
         return view('admin.pages.dashboard-superadmin');
     }
 
-    // Handle halaman Manajemen User
     public function userIndex(Request $request)
     {
-        // 1. Ambil keyword pencarian dari input text
         $keyword = $request->get('search');
 
-        // 2. Mengambil SEMUA data user tanpa memandang tingkatan role
-        $usersQuery = User::query();
+        $users = User::query()
+            ->when($keyword, function ($query) use ($keyword) {
+                $query->where('user_id', 'LIKE', "%{$keyword}%")
+                    ->orWhere('name', 'LIKE', "%{$keyword}%")
+                    ->orWhere('email', 'LIKE', "%{$keyword}%")
+                    ->orWhere('phone', 'LIKE', "%{$keyword}%")
+                    // Mencari berdasarkan format tanggal (d M Y)
+                    ->orWhereRaw("DATE_FORMAT(created_at, '%d %b %Y') LIKE ?", ["%{$keyword}%"]);
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
 
-        // 3. Logika fitur pencarian berdasarkan nama atau email
-        if (!empty($keyword)) {
-            $usersQuery->where(function ($query) use ($keyword) {
-                $query->where('name', 'LIKE', "%$keyword%")
-                    ->orWhere('email', 'LIKE', "%$keyword%");
-            });
-        }
-
-        // 4. Urutkan dari pendaftar terbaru dan bagi 10 entri per halaman
-        $users = $usersQuery->latest()->paginate(10)->withQueryString();
-
-        // 5. Kirim data ke file Blade view
         return view('admin.pages.user.index-user', compact('users', 'keyword'));
     }
 
