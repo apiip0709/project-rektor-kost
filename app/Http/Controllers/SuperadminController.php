@@ -26,7 +26,7 @@ class SuperadminController extends Controller
                     // Mencari berdasarkan format tanggal (d M Y)
                     ->orWhereRaw("DATE_FORMAT(created_at, '%d %b %Y') LIKE ?", ["%{$keyword}%"]);
             })
-            ->latest()
+            ->orderBy('user_id', 'asc')
             ->paginate(10)
             ->withQueryString();
 
