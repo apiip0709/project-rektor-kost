@@ -81,14 +81,14 @@ class LoginController extends Controller
         return redirect()->away($forcedUrl);
     }
 
-    public function handleGoogleCallback()
+    // 🌟 PERBAIKAN: Menambahkan Request $request ke dalam parameter method
+    public function handleGoogleCallback(Request $request)
     {
         try {
             $googleUser = Socialite::driver('google')->user();
 
             $user = User::where('email', $googleUser->getEmail())->first();
 
-            // 🌟 PERBAIKAN DI SINI: Menggunakan redirect()->route() sebelum memanggil withInput()
             if (!$user) {
                 return redirect()->route('register')
                     ->withInput([
@@ -99,8 +99,14 @@ class LoginController extends Controller
             }
 
             Auth::login($user);
-            $request = request();
+
+            // Menggunakan objek $request yang valid dari parameter injector
             $request->session()->regenerate();
+
+            // SINKRONISASI: Arahkan ke dashboard jika admin, atau home jika user biasa
+            if ($user->role === 'superadmin' || $user->role === 'admin') {
+                return redirect()->route('superadmin.dashboard')->with('success', 'Berhasil masuk sebagai Admin!');
+            }
 
             return redirect()->route('home')->with('success', 'Berhasil masuk menggunakan akun Google!');
         } catch (\Exception $e) {
@@ -136,6 +142,8 @@ class LoginController extends Controller
         $phoneFormatted = $phoneFromWa;
         if (strpos($phoneFromWa, '62') === 0) {
             $phoneFormatted = '0' . substr($phoneFromWa, 2);
+        } elseif (strpos($phoneFromWa, '+62') === 0) {
+            $phoneFormatted = '0' . substr($phoneFromWa, 3);
         }
 
         $user = User::where('phone', $phoneFormatted)->first();
@@ -150,7 +158,13 @@ class LoginController extends Controller
         }
 
         Auth::login($user);
+        $request->session()->regenerate(); // Tambahkan regenerasi session demi keamanan
 
-        return redirect()->route('dashboard');
+        // SINKRONISASI RUTE REDIRECT
+        if ($user->role === 'superadmin' || $user->role === 'admin') {
+            return redirect()->route('superadmin.dashboard');
+        }
+
+        return redirect()->route('home');
     }
 }

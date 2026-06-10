@@ -9,11 +9,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('owners', function (Blueprint $table) {
-            // owner_id sebagai primary key berupa string (Contoh: OW-001)
             $table->string('owner_id')->primary();
 
-            // ForeignKey yang menghubungkan ke kolom 'id' di tabel 'users'
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            // 🌟 UBAH KODE FOREIGN KEY MENJADI SEPERTI INI:
+            $table->string('user_id');
+            $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
 
             // Data personal yang digeser ke tabel owner
             $table->enum('gender', ['laki-laki', 'perempuan'])->nullable();

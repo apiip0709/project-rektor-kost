@@ -15,29 +15,33 @@
         </div>
 
         <nav class="space-y-1">
-            <a href="#"
-                class="flex items-center justify-center lg:justify-start gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+            <a href="{{ route('superadmin.dashboard') }}"
+                class="flex items-center justify-center lg:justify-start gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors
+              {{ request()->routeIs('superadmin.dashboard') ? 'bg-slate-100 text-slate-900 font-bold border-r-4 border-slate-900' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 font-semibold' }}"
                 title="Ikhtisar Ekosistem">
                 <i class="fa-solid fa-chart-simple text-base w-5 text-center shrink-0"></i>
                 <span class="hidden lg:inline whitespace-nowrap">Ikhtisar Ekosistem</span>
             </a>
 
             <a href="{{ route('superadmin.user.index') }}"
-                class="flex items-center justify-center lg:justify-start gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                class="flex items-center justify-center lg:justify-start gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors
+              {{ request()->routeIs('superadmin.user.*') ? 'bg-slate-100 text-slate-900 font-bold border-r-4 border-slate-900' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 font-semibold' }}"
                 title="Manajemen User">
                 <i class="fa-solid fa-users text-base w-5 text-center shrink-0"></i>
                 <span class="hidden lg:inline whitespace-nowrap">Manajemen User</span>
             </a>
 
             <a href="{{ route('superadmin.owner.index') }}"
-                class="flex items-center justify-center lg:justify-start gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                class="flex items-center justify-center lg:justify-start gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors
+              {{ request()->routeIs('superadmin.owner.*') ? 'bg-slate-100 text-slate-900 font-bold border-r-4 border-slate-900' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 font-semibold' }}"
                 title="Manajemen Pemilik">
                 <i class="fa-solid fa-user-tie text-base w-5 text-center shrink-0"></i>
                 <span class="hidden lg:inline whitespace-nowrap">Manajemen Pemilik</span>
             </a>
 
             <a href="{{ route('superadmin.kost.index') }}"
-                class="flex items-center justify-center lg:justify-start gap-3 rounded-lg bg-slate-50 px-3 py-2.5 text-sm font-bold text-slate-900 border-r-4 border-slate-900"
+                class="flex items-center justify-center lg:justify-start gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors
+              {{ request()->routeIs('superadmin.kost.*') ? 'bg-slate-100 text-slate-900 font-bold border-r-4 border-slate-900' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 font-semibold' }}"
                 title="Properti">
                 <i class="fa-solid fa-house-chimney text-base w-5 text-center shrink-0"></i>
                 <span class="hidden lg:inline whitespace-nowrap">Properti</span>

@@ -24,7 +24,7 @@ class Owner extends Model
     ];
 
     /**
-     * 🌟 LOGIKA AUTO-NUMBER KODE OWNER (OW-001, OW-002, dst)
+     * 🌟 PERBAIKAN LOGIKA AUTO-NUMBER KODE OWNER MENJADI (OWN-0001, OWN-0002, dst)
      */
     protected static function booted()
     {
@@ -33,14 +33,14 @@ class Owner extends Model
             $latestOwner = static::orderBy('owner_id', 'desc')->first();
 
             if (! $latestOwner) {
-                // Jika belum ada data owner sama sekali
-                $owner->owner_id = 'OW-001';
+                // 🌟 JIKA BELUM ADA DATA: Setel data pertama ke OWN-0001 (4 digit)
+                $owner->owner_id = 'OWN-0001';
             } else {
-                // Mengambil angka dari string terakhir (misal 'OW-001' diambil angka 1)
-                $number = intval(substr($latestOwner->owner_id, 3));
-                
-                // Tambahkan angka 1 lalu format kembali menjadi 3 digit (002, 003, dst)
-                $owner->owner_id = 'OW-' . str_pad($number + 1, 3, '0', STR_PAD_LEFT);
+                // 🌟 PERBAIKAN SUBSTR: 'OWN-' panjangnya 4 karakter, maka kita ambil angka dari karakter ke-4 dan seterusnya
+                $number = intval(substr($latestOwner->owner_id, 4));
+
+                // 🌟 PERBAIKAN STR_PAD: Tambahkan angka 1 lalu format kembali menjadi 4 digit (0002, 0003, dst)
+                $owner->owner_id = 'OWN-' . str_pad($number + 1, 4, '0', STR_PAD_LEFT);
             }
         });
     }
@@ -50,7 +50,8 @@ class Owner extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id', 'id');
+        // 🌟 PERBAIKAN RELASI: Mengubah foreign key lokal target dari 'id' menjadi 'user_id' agar sinkron dengan model User
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
     /**

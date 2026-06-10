@@ -20,7 +20,7 @@
             <p class="text-xs text-gray-400 max-w-xs mx-auto">Mulai cari kost impianmu dan nikmati berbagai kemudahan.</p>
         </div>
 
-        {{-- 🌟 TEMPAT MENAMPILKAN PESAN ERROR DARI REDIRECT CALLBACK --}}
+        {{-- TEMPAT MENAMPILKAN PESAN ERROR DARI REDIRECT CALLBACK --}}
         @if (session('error'))
             <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-xl">
                 <p class="text-[11px] text-red-700 font-semibold leading-relaxed">
@@ -32,7 +32,7 @@
         <form action="{{ route('register.process') }}" method="POST" class="space-y-4">
             @csrf
 
-            {{-- 🌟 AMBIL DATA DARI FLASH INPUT JIKA REDIRECT --}}
+            {{-- AMBIL DATA DARI FLASH INPUT JIKA REDIRECT --}}
             <input type="hidden" name="register_method" id="register_method"
                 value="{{ old('register_method', session()->has('error') ? 'google' : '') }}">
 
@@ -40,15 +40,17 @@
                 <p class="text-xs text-red-500 font-semibold mb-2">{{ $message }}</p>
             @enderror
 
-            {{-- 🌟 1. AREA INPUT DINAMIS UTAMA (SEKARANG DI ATAS) --}}
+            {{-- 1. AREA INPUT DINAMIS UTAMA --}}
             <div id="area_input_dinamis" class="space-y-4">
 
                 {{-- Kolom teks instruksi awal jika belum memilih metode --}}
-                <div id="pemberitahuan_awal" class="text-center py-4 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                    <p class="text-xs text-gray-500">Silakan pilih metode pendaftaran di bawah terlebih dahulu untuk mengisi formulir.</p>
+                <div id="pemberitahuan_awal"
+                    class="text-center py-4 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                    <p class="text-xs text-gray-500">Silakan pilih metode pendaftaran di bawah terlebih dahulu untuk mengisi
+                        formulir.</p>
                 </div>
 
-                {{-- 🌟 KOLOM NAMA LENGKAP --}}
+                {{-- KOLOM NAMA LENGKAP --}}
                 <div id="kolom_nama" class="hidden">
                     <label class="text-xs font-bold text-gray-700 block mb-1.5">Nama Lengkap</label>
                     <input type="text" name="name" id="input_name" value="{{ old('name') }}"
@@ -59,7 +61,7 @@
                     @enderror
                 </div>
 
-                {{-- Kolom Email untuk Metode Google --}}
+                {{-- 🌟 FIX KOMENTAR: Ini Kolom Email untuk Metode Google --}}
                 <div id="kolom_whatsapp" class="hidden">
                     <label class="text-xs font-bold text-gray-700 block mb-1.5">Email</label>
                     <input type="email" name="email" id="input_email" value="{{ old('email') }}"
@@ -70,7 +72,7 @@
                     @enderror
                 </div>
 
-                {{-- Kolom No Telepon untuk Metode WhatsApp --}}
+                {{-- 🌟 FIX KOMENTAR: Ini Kolom No Telepon untuk Metode WhatsApp --}}
                 <div id="kolom_google" class="hidden">
                     <label class="text-xs font-bold text-gray-700 block mb-1.5">No. Telepon</label>
                     <input type="text" name="phone" id="input_phone" value="{{ old('phone') }}"
@@ -107,7 +109,8 @@
                             <p class="text-[11px] text-red-500 mt-1 font-medium">{{ $message }}</p>
                         @enderror
 
-                        <p id="notif_otp_sukses" class="hidden mt-1.5 text-[11px] font-semibold flex items-center gap-1"></p>
+                        <p id="notif_otp_sukses" class="hidden mt-1.5 text-[11px] font-semibold flex items-center gap-1">
+                        </p>
                     </div>
 
                     <button type="submit"
@@ -117,14 +120,14 @@
                 </div>
             </div>
 
-            {{-- 🌟 2. PEMBATAS ATAU (DI TENGAH) --}}
+            {{-- 2. PEMBATAS ATAU --}}
             <div id="pembatas_atau" class="relative flex py-2 items-center text-xs text-gray-400 justify-center">
                 <div class="flex-grow border-t border-gray-200"></div>
                 <span class="flex-shrink mx-4 font-bold tracking-wider text-gray-400">PILIH METODE DAFTAR</span>
                 <div class="flex-grow border-t border-gray-200"></div>
             </div>
 
-            {{-- 🌟 3. AREA TOMBOL UTAMA REGISTRASI METODE (SEKARANG DI BAWAH) --}}
+            {{-- 3. AREA TOMBOL UTAMA REGISTRASI METODE --}}
             <div id="area_tombol_utama" class="space-y-3">
                 <button type="button" id="btn_google" onclick="selectMethod('google')"
                     class="w-full border border-gray-300 bg-white hover:bg-gray-100 hover:border-gray-400 text-gray-700 text-xs font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2.5 transition duration-200 shadow-2xs cursor-pointer">
@@ -145,13 +148,15 @@
 
         <div class="text-center">
             <p class="text-xs text-gray-500 font-medium">
-                Sudah punya akun? <a href="{{ route('login') }}" class="text-gray-900 font-bold hover:underline">Masuk sekarang</a>
+                Sudah punya akun? <a href="{{ route('login') }}" class="text-gray-900 font-bold hover:underline">Masuk
+                    sekarang</a>
             </p>
         </div>
 
         <div class="bg-amber-50/60 border-l-4 border-amber-400 p-4 rounded-r-xl">
             <p class="text-[11px] text-amber-700 font-medium leading-relaxed">
-                "Daftar untuk simpan hunian favorit, booking jadwal survey instan, dan pantau status pengajuan kost Anda dengan mudah."
+                "Daftar untuk simpan hunian favorit, booking jadwal survey instan, dan pantau status pengajuan kost Anda
+                dengan mudah."
             </p>
         </div>
     </div>
@@ -162,7 +167,8 @@
             if (currentMethod) {
                 selectMethod(currentMethod);
 
-                if (document.getElementsByName('otp')[0].value || "{{ $errors->has('otp') }}") {
+                // 🌟 FIX LOGIKA: Pengecekan status error OTP menggunakan format boolean yang aman
+                if (document.getElementsByName('otp')[0].value || {{ $errors->has('otp') ? 'true' : 'false' }}) {
                     showOtpMessage('success', 'Sesi registrasi dimuat kembali.');
                 }
             }
@@ -171,24 +177,20 @@
         function selectMethod(method) {
             document.getElementById('register_method').value = method;
             document.getElementById('input_bersama').classList.remove('hidden');
-            
-            // Sembunyikan teks petunjuk awal pembuka formulir
-            if(document.getElementById('pemberitahuan_awal')) {
+
+            if (document.getElementById('pemberitahuan_awal')) {
                 document.getElementById('pemberitahuan_awal').classList.add('hidden');
             }
-            
-            // Kolom nama selalu ditampilkan pada kedua metode
+
             document.getElementById('kolom_nama').classList.remove('hidden');
 
             if (method === 'google') {
                 document.getElementById('btn_google').classList.add('hidden');
                 document.getElementById('btn_whatsapp').classList.remove('hidden');
                 document.getElementById('pembatas_atau').classList.remove('hidden');
-                
-                // Ubah teks pembatas tengah sebagai info penanda metode aktif
+
                 document.getElementById('pembatas_atau').querySelector('span').innerText = "ATAU GANTI KE WHATSAPP";
 
-                // Tampilkan email, sembunyikan telepon
                 document.getElementById('kolom_whatsapp').classList.remove('hidden');
                 document.getElementById('kolom_google').classList.add('hidden');
 
@@ -197,10 +199,8 @@
                 document.getElementById('btn_google').classList.remove('hidden');
                 document.getElementById('pembatas_atau').classList.remove('hidden');
 
-                // Ubah teks pembatas tengah sebagai info penanda metode aktif
                 document.getElementById('pembatas_atau').querySelector('span').innerText = "ATAU GANTI KE GOOGLE";
 
-                // Tampilkan telepon, sembunyikan email
                 document.getElementById('kolom_google').classList.remove('hidden');
                 document.getElementById('kolom_whatsapp').classList.add('hidden');
             }

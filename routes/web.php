@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\KostController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\SuperadminController;
 use Illuminate\Support\Facades\Route;
 
 // 🟢 AKSES UMUM (Pengunjung biasa / Belum Login)
@@ -41,16 +42,21 @@ Route::middleware('auth')->group(function () {
     // ─── KELOMPOK ROLE: SUPERADMIN ───
     Route::middleware('role:superadmin')->group(function () {
 
-        // 🌟 Letakkan di sini jika ingin URL-nya murni /dashboard-admin
-        Route::get('/dashboard-admin', function () {
-            return view('admin.layouts.superadmin');
-        })->name('superadmin.dashboard');
+        Route::get('/dashboard-admin', [SuperadminController::class, 'dashboard'])
+            ->name('superadmin.dashboard');
 
-        // Route sisanya tetap pakai prefix agar rapi (/superadmin/user, /superadmin/kost, dll)
         Route::prefix('superadmin')->name('superadmin.')->group(function () {
-            Route::resource('user', UserController::class);
-            Route::resource('owner', OwnerController::class);
-            Route::resource('kost', KostController::class);
+
+            // 1. Rute Index Utama dihandle SuperadminController (Untuk Tabel & Search)
+            Route::get('/user', [SuperadminController::class, 'userIndex'])->name('user.index');
+            Route::get('/owner', [SuperadminController::class, 'ownerIndex'])->name('owner.index');
+            Route::get('/kost', [SuperadminController::class, 'kostIndex'])->name('kost.index');
+
+            // 2. Rute Aksi Sisanya (Show, Edit, Update, Delete) dihandle oleh masing-masing Controller,
+            // TAPI wajib berikan perintah 'except' pada index agar Laravel tidak mencari fungsi index() yang sudah dihapus!
+            Route::resource('user', UserController::class)->except(['index']);
+            Route::resource('owner', OwnerController::class)->except(['index']);
+            Route::resource('kost', KostController::class)->except(['index']);
         });
     });
 

@@ -14,6 +14,30 @@
             </a>
         </div>
 
+        {{-- 🌟 TAMBAHAN: NOTIFIKASI SUKSES PENDAFTARAN AKUN --}}
+        @if (session('success'))
+            <div
+                class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r-xl flex items-start gap-2.5 animate-fade-in">
+                <svg class="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor"
+                    stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z">
+                    </path>
+                </svg>
+                <p class="text-[11px] text-emerald-800 font-bold leading-relaxed">
+                    {{ session('success') }}
+                </p>
+            </div>
+        @endif
+
+        {{-- JIKA ADA FLASH ERROR JURUSAN LAIN --}}
+        @if (session('error'))
+            <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-xl">
+                <p class="text-[11px] text-red-700 font-semibold leading-relaxed">
+                    {{ session('error') }}
+                </p>
+            </div>
+        @endif
+
         <div class="text-center space-y-2">
             <h2 class="text-xl font-black text-gray-900 tracking-tight">Masuk Sebagai Pengguna</h2>
             <p class="text-xs text-gray-400 max-w-xs mx-auto">Temukan hunian aman dengan standar kualitas terjamin.</p>
@@ -22,7 +46,6 @@
         <form action="{{ route('login') }}" method="POST" class="space-y-4">
             @csrf
 
-            {{-- 🌟 1. AREA KOLOM INPUT UTAMA (SEKARANG DI ATAS) --}}
             <div class="space-y-4 pt-2">
                 <div>
                     <label class="text-xs font-medium text-gray-700 block mb-1.5">Email atau No. Telepon</label>

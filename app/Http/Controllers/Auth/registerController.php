@@ -29,7 +29,6 @@ class RegisterController extends Controller
     {
         $method = $request->input('register_method');
 
-        // 🌟 Tambahkan 'name' ke aturan validasi dasar karena sekarang sifatnya wajib
         $rules = [
             'name'     => 'required|string|max:255',
             'password' => 'required|string|min:8',
@@ -37,19 +36,19 @@ class RegisterController extends Controller
         ];
 
         if ($method === 'google') {
-            $rules['email'] = 'required|email|unique:users,email';
+            $rules['email'] = 'required|email|unique:users,email,NULL,user_id';
         } elseif ($method === 'whatsapp') {
-            $rules['phone'] = 'required|numeric|unique:users,phone';
+            $rules['phone'] = 'required|numeric|unique:users,phone,NULL,user_id';
 
             if ($request->filled('email')) {
-                $rules['email'] = 'nullable|email|unique:users,email';
+                $rules['email'] = 'nullable|email|unique:users,email,NULL,user_id';
             }
         } else {
             return back()->withErrors(['register_method' => 'Silahkan pilih metode pendaftaran terlebih dahulu.']);
         }
 
         $request->validate($rules, [
-            'name.required'     => 'Nama lengkap wajib diisi.', // 🌟 Pesan error custom untuk nama
+            'name.required'     => 'Nama lengkap wajib diisi.',
             'email.required'    => 'Email wajib diisi.',
             'email.email'       => 'Format email tidak valid.',
             'email.unique'      => 'Email/Gmail ini sudah terdaftar di sistem. Silakan gunakan email lain atau masuk.',
@@ -68,8 +67,7 @@ class RegisterController extends Controller
             return back()->withErrors(['otp' => 'Kode OTP yang Anda masukkan salah atau telah kedaluwarsa.'])->withInput();
         }
 
-        // 🌟 KODE GENERATE NAME YANG LAMA SUDAH DIHAPUS 🌟
-
+        // 🌟 DI SINI FORMAT 'user_id' OTOMATIS TERGENERATE LEWAT MODEL ELOQUENT
         User::create([
             'name'            => $request->input('name'),
             'email'           => $request->filled('email') ? $request->input('email') : null,
@@ -83,6 +81,9 @@ class RegisterController extends Controller
         return redirect()->route('login')->with('success', 'Akun Anda berhasil didaftarkan! Silakan masuk.');
     }
 
+    /**
+     * Mengirimkan Kode OTP via Email atau WhatsApp
+     */
     public function sendOtp(Request $request)
     {
         $method = $request->input('register_method');
@@ -90,7 +91,7 @@ class RegisterController extends Controller
         if ($method === 'google') {
             $validator = Validator::make($request->all(), [
                 'name'  => 'required|string|max:255',
-                'email' => 'required|email|unique:users,email'
+                'email' => 'required|email|unique:users,email,NULL,user_id'
             ], [
                 'name.required'  => 'Nama lengkap wajib diisi sebelum mengirim OTP.',
                 'email.required' => 'Email wajib diisi sebelum mengirim OTP.',
@@ -100,7 +101,7 @@ class RegisterController extends Controller
         } else {
             $validator = Validator::make($request->all(), [
                 'name'  => 'required|string|max:255',
-                'phone' => 'required|numeric|unique:users,phone'
+                'phone' => 'required|numeric|unique:users,phone,NULL,user_id'
             ], [
                 'name.required'  => 'Nama lengkap wajib diisi sebelum mengirim OTP.',
                 'phone.required' => 'Nomor telepon wajib diisi sebelum mengirim OTP.',
@@ -122,7 +123,6 @@ class RegisterController extends Controller
         $responseData = [];
         $statusCode = 200;
 
-        // 4. SINKRONISASI LOGIKA PENGIRIMAN OTP
         if ($method === 'google') {
             try {
                 Mail::to($request->input('email'))->send(new SendOtpMail($otpCode));
@@ -138,13 +138,10 @@ class RegisterController extends Controller
                 ];
                 $statusCode = 500;
             }
-        } else {
-            // JALUR WHATSAPP: KIRIM OTP KE WHATSAPP VIA API FONNTE
+        } else { // 🌟 PERBAIKAN SINTAKS: Menambahkan kata kunci 'else' yang hilang agar tidak bertabrakan
             try {
-                // Ambil nomor telepon dari request
                 $phone = $request->input('phone');
 
-                // FORMATTING OTOMATIS: Mengubah awalan '08' menjadi '62'
                 if (strpos($phone, '0') === 0) {
                     $phone = '62' . substr($phone, 1);
                 }
@@ -155,13 +152,12 @@ class RegisterController extends Controller
                     "jangan sebarkan kode ini kepada siapa pun termasuk pihak Rektor Kost.";
 
                 $response = Http::withHeaders([
-                    'Authorization' => env('WA_GATEWAY_TOKEN'), // Token diatur di file .env
+                    'Authorization' => env('WA_GATEWAY_TOKEN'),
                 ])->post('https://api.fonnte.com/send', [
                     'target'  => $phone,
-                    'message' => $messageTemplate, // 🌟 Diarahkan ke variabel template di atas
+                    'message' => $messageTemplate,
                 ]);
 
-                // CEK RESPONS DARI SERVER FONNTE
                 $result = $response->json();
 
                 if (isset($result['status']) && $result['status'] === false) {
