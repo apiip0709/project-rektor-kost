@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\OwnerController;
+use App\Http\Controllers\KostController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 // 🟢 AKSES UMUM (Pengunjung biasa / Belum Login)
@@ -34,42 +37,45 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
     // ─── KELOMPOK ROLE: SUPERADMIN ───
-    Route::middleware('role:superadmin')->group(function () {
-        Route::get('/superadmin/dashboard', function () {
-            return "Halaman Dashboard Superadmin";
-        })->name('superadmin.dashboard');
+    // Menghapus 'auth' ganda, menyisakan role:superadmin
+    Route::middleware('role:superadmin')->prefix('superadmin')->name('superadmin.')->group(function () {
+        
+
+        Route::resource('user', UserController::class);
+        Route::resource('owner', OwnerController::class);
+        Route::resource('kost', KostController::class);
     });
-    
-    // ─── KELOMPOK ROLE: ADMIN ───
-    Route::middleware('role:admin')->group(function () {
-        Route::get('/admin/dashboard', function () {
-            return "Halaman Dashboard Admin";
-        })->name('admin.dashboard');
+
+    // ─── KELOMPOK ROLE: TEKNISI (Role baru Anda dari tabel users) ───
+    Route::middleware('role:teknisi')->prefix('teknisi')->name('teknisi.')->group(function () {
+        Route::get('/dashboard', function () {
+            return "Halaman Dashboard Teknisi";
+        })->name('dashboard');
     });
-    
+
     // ─── KELOMPOK ROLE: PEMILIK KOST ───
-    Route::middleware('role:pemilik')->group(function () {
+    Route::middleware('role:pemilik')->prefix('owner')->name('owner.')->group(function () {
         Route::get('/dashboard', function () {
             return view('owner.pages.dashboard');
         })->name('dashboard');
 
+        // 🌟 KUNCI PERUBAHAN: Pasang Resource Kost & Room untuk Pemilik di sini
+        // Menggunakan Controller yang sama dengan Superadmin, tapi URL-nya nanti /owner/kost
+        Route::resource('kost', KostController::class);
+        // Route::resource('room', RoomController::class);
+        
+        // Route manual Anda untuk kamar bisa pelan-pelan dialihkan ke Resource di atas agar CRUD-nya otomatis
         Route::get('/kelola-kamar', function () {
             return view('owner.pages.kelola-room');
-            })->name('kelola');
-
-        Route::get('/tambah-kamar', function () {
-            return view('owner.pages.tambah-room');
-        })->name('tambah');
+        })->name('kelola');
     });
 
     // ─── KELOMPOK ROLE: PENGGUNA (PENCARI KOST) ───
-    Route::middleware('role:pengguna')->group(function () {
-        Route::get('/user/profil', function () {
+    Route::middleware('role:pengguna')->prefix('user')->name('user.')->group(function () {
+        Route::get('/profil', function () {
             return "Halaman Profil Pencari Kost";
-        })->name('user.profile');
+        })->name('profile');
     });
-
-
-
 });
