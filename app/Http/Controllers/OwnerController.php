@@ -92,7 +92,7 @@ class OwnerController extends Controller
             'gender' => 'required',
             'pob'    => 'required|string',
             'dob'    => 'required|date',
-            'status' => 'required|in:silver,gold,premium',
+            'status' => 'required|in:berlangganan,trial,tidak',
         ]);
 
         // Anda tidak perlu mencari $owner lagi, Laravel sudah mencarikannya

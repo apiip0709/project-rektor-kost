@@ -55,7 +55,7 @@
                                 <th class="py-3.5 px-4 text-left">Nama</th>
                                 <th class="py-3.5 px-4 text-left">Email</th>
                                 <th class="py-3.5 px-4 text-left">HP</th>
-                                <th class="py-3.5 px-4 text-left">Login</th>
+                                <th class="py-3.5 px-4 text-left">Metode Registrasi</th>
                                 <th class="py-3.5 px-4 text-left">Tanggal</th>
                                 <th class="py-3.5 px-4">Aksi</th>
                             </tr>
@@ -84,9 +84,18 @@
                                     </td>
 
                                     <td class="py-4 px-4 text-left">
+                                        @php
+                                            $method = $user->register_method ?? 'unknown';
+                                            // Tentukan warna berdasarkan metode
+                                            $colorClass = match ($method) {
+                                                'google' => 'bg-blue-50 text-blue-600',
+                                                'whatsapp' => 'bg-emerald-50 text-emerald-600',
+                                            };
+                                        @endphp
+
                                         <span
-                                            class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg
-                                            {{ $user->register_method == 'google' ? 'bg-blue-50 text-blue-600' : 'bg-green-50 text-green-600' }}">
+                                            class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg {{ $colorClass }}">
+                                            {{ ucfirst($method) }}
                                         </span>
                                     </td>
 

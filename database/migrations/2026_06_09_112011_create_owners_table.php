@@ -21,7 +21,7 @@ return new class extends Migration
             $table->date('dob')->nullable();   // Date of Birth (Tanggal Lahir)
 
             $table->enum('akun', ['aktif', 'menunggu', 'nonaktif'])->default('menunggu');
-            $table->enum('status', ['premium', 'gold', 'silver'])->default('silver');
+            $table->enum('status', ['berlangganan','tidak','trial'])->default('tidak');
 
             $table->timestamps();
         });

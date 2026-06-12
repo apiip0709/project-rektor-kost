@@ -6,7 +6,7 @@
         <div class="mb-6 flex justify-between items-center">
             <a href="{{ route('superadmin.owner.index') }}"
                 class="text-sm text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-2">
-                <i class="fa-solid fa-arrow-left"></i> Kembali ke Pemilik
+                <i class="fa-solid fa-arrow-left"></i> Kembali ke Manajemen Pemilik
             </a>
             <span class="text-xs font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full">
                 <i class="fa-solid fa-link mr-1"></i> Data Berasosiasi

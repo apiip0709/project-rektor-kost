@@ -64,13 +64,20 @@
                             <label for="status" class="block text-sm font-bold text-slate-700 mb-1">Status Akun</label>
                             <select id="status" name="status"
                                 class="w-full p-3 border border-slate-200 rounded-lg outline-none focus:border-slate-900">
-                                <option value="silver" {{ old('status', $owner->status) == 'silver' ? 'selected' : '' }}>
-                                    Silver</option>
-                                <option value="gold" {{ old('status', $owner->status) == 'gold' ? 'selected' : '' }}>Gold
+
+                                <option value="berlangganan"
+                                    {{ old('status', $owner->status) == 'berlangganan' ? 'selected' : '' }}>
+                                    Berlangganan
                                 </option>
-                                <option value="premium" {{ old('status', $owner->status) == 'premium' ? 'selected' : '' }}>
-                                    Premium
+
+                                <option value="trial" {{ old('status', $owner->status) == 'trial' ? 'selected' : '' }}>
+                                    Trial
                                 </option>
+
+                                <option value="tidak" {{ old('status', $owner->status) == 'tidak' ? 'selected' : '' }}>
+                                    Tidak
+                                </option>
+
                             </select>
                         </div>
                     </div>

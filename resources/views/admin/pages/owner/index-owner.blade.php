@@ -103,7 +103,14 @@
                                 </td>
                                 <td class="py-4 px-4">
                                     <span
-                                        class="px-2 py-1 text-[10px] font-bold rounded-lg {{ $owner->status == 'premium' ? 'bg-purple-100 text-purple-700' : ($owner->status == 'gold' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600') }}">{{ strtoupper($owner->status ?? 'SILVER') }}</span>
+                                        class="px-2 py-1 text-[10px] font-bold rounded-lg uppercase
+                                        {{ $owner->status === 'berlangganan'
+                                            ? 'bg-amber-100 text-amber-700'
+                                            : ($owner->status === 'trial'
+                                                ? 'bg-slate-100 text-slate-600'
+                                                : 'bg-red-100 text-red-700') }}">
+                                        {{ $owner->status }}
+                                    </span>
                                 </td>
                                 <td class="py-4 px-4">
                                     <div class="flex items-center justify-center gap-3">
@@ -182,7 +189,8 @@
                 clearTimeout(debounceTimer);
                 debounceTimer = setTimeout(() => {
                     fetch(
-                            `{{ route('superadmin.owner.index') }}?search=${encodeURIComponent(e.target.value)}`)
+                            `{{ route('superadmin.owner.index') }}?search=${encodeURIComponent(e.target.value)}`
+                            )
                         .then(res => res.text())
                         .then(html => {
                             const parser = new DOMParser();

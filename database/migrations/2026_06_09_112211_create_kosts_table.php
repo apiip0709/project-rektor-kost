@@ -30,7 +30,8 @@ return new class extends Migration
             $table->decimal('latitude', 10, 8)->nullable();
             $table->decimal('longitude', 11, 8)->nullable();
 
-            $table->enum('status_kemitraan', ['aktif', 'ditangguhkan', 'blacklist'])->default('aktif');
+            $table->enum('status_kost', ['premium', 'gold', 'silver'])->default('silver');
+            $table->enum('status_kemitraan', ['aktif', 'tidak aktif'])->default('aktif');
             $table->timestamps();
         });
     }

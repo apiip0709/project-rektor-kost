@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Owner;
+use App\Models\Kost;
 
 class SuperadminController extends Controller
 {
-    // Handle halaman Ikhtisar Ekosistem (Dashboard)
     public function dashboard()
     {
         return view('admin.pages.dashboard-superadmin');
@@ -67,6 +67,16 @@ class SuperadminController extends Controller
     // Handle halaman Manajemen Properti (Kost)
     public function kostIndex()
     {
-        return view('admin.pages.kost.index-kost');
+        $kosts = Kost::with('owner')->get();
+
+        $stats = [
+            'total' => Kost::count(),
+            'aktif' => Kost::where('status_kemitraan', 'aktif')->count(),
+            'premium' => Kost::where('status_langganan', 'premium')->count(),
+            'gold' => Kost::where('status_langganan', 'gold')->count(),
+            'silver' => Kost::where('status_langganan', 'silver')->count(),
+        ];
+
+        return view('admin.pages.kost.index-kost', compact('kosts', 'stats'));
     }
 }

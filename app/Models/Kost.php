@@ -38,7 +38,7 @@ class Kost extends Model
     ];
 
     /**
-     * 🌟 LOGIKA AUTO-NUMBER KODE RK-0001
+     * 🌟 LOGIKA AUTO-NUMBER KODE PR-0001
      */
     protected static function booted()
     {
@@ -48,12 +48,12 @@ class Kost extends Model
 
             if (! $latestKost) {
                 // Jika belum ada data sama sekali di database
-                $kost->id_kost = 'RK-0001';
+                $kost->id_kost = 'PR-0001';
             } else {
-                // Mengambil angka dari string terakhir (misal 'RK-0001' diambil 1)
+                // Mengambil angka dari string terakhir (misal 'PR-0001' diambil 1)
                 $number = intval(substr($latestKost->id_kost, 3));
                 // Tambahkan angka 1 lalu format kembali menjadi 4 digit (0002, 0003, dst)
-                $kost->id_kost = 'RK-' . str_pad($number + 1, 4, '0', STR_PAD_LEFT);
+                $kost->id_kost = 'PR-' . str_pad($number + 1, 4, '0', STR_PAD_LEFT);
             }
         });
     }
