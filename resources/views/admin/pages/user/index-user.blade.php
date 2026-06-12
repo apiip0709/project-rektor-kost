@@ -53,9 +53,10 @@
                                 class="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase text-slate-400 text-center">
                                 <th class="py-3.5 px-4 text-left">ID Pengguna</th>
                                 <th class="py-3.5 px-4 text-left">Nama</th>
-                                <th class="py-3.5 px-4 text-left">Role</th>
-                                <th class="py-3.5 px-4 text-left">Email/HP</th>
-                                <th class="py-3.5 px-4">Tanggal</th>
+                                <th class="py-3.5 px-4 text-left">Email</th>
+                                <th class="py-3.5 px-4 text-left">HP</th>
+                                <th class="py-3.5 px-4 text-left">Login</th>
+                                <th class="py-3.5 px-4 text-left">Tanggal</th>
                                 <th class="py-3.5 px-4">Aksi</th>
                             </tr>
                         </thead>
@@ -65,13 +66,33 @@
                                     <td class="py-4 px-4 text-left text-xs font-mono text-slate-500">{{ $user->user_id }}
                                     </td>
                                     <td class="py-4 px-4 text-left font-bold text-slate-900">{{ $user->name }}</td>
-                                    <td class="py-4 px-4 text-left capitalize">{{ $user->role }}</td>
-                                    <td class="py-4 px-4 text-left">
-                                        <div class="text-slate-900">{{ $user->email ?? $user->phone }}</div>
-                                        <div class="text-[10px] text-slate-400 uppercase tracking-wider">
-                                            {{ $user->register_method }}</div>
+
+                                    <td class="py-4 px-4 text-left text-sm text-slate-600">
+                                        @if ($user->email)
+                                            {{ $user->email }}
+                                        @else
+                                            <span class="text-xs italic lowercase text-slate-400">kosong</span>
+                                        @endif
                                     </td>
-                                    <td class="py-4 px-4 text-slate-900">{{ $user->created_at->format('d M Y') }}</td>
+
+                                    <td class="py-4 px-4 text-left text-sm text-slate-600">
+                                        @if ($user->phone)
+                                            {{ $user->phone }}
+                                        @else
+                                            <span class="text-xs italic lowercase text-slate-400">kosong</span>
+                                        @endif
+                                    </td>
+
+                                    <td class="py-4 px-4 text-left">
+                                        <span
+                                            class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg
+                                            {{ $user->register_method == 'google' ? 'bg-blue-50 text-blue-600' : 'bg-green-50 text-green-600' }}">
+                                        </span>
+                                    </td>
+
+                                    <td class="py-4 px-4 text-left text-sm text-slate-600">
+                                        {{ $user->created_at->format('d M Y') }}</td>
+
                                     <td class="py-4 px-4">
                                         <div class="flex justify-center items-center gap-3">
                                             <a href="{{ route('superadmin.user.edit', $user->user_id) }}"
@@ -79,7 +100,6 @@
                                                 title="Edit">
                                                 <i class="fa-solid fa-pen-to-square"></i>
                                             </a>
-
                                             <button type="button"
                                                 onclick="openDeleteModal('{{ route('superadmin.user.destroy', $user->user_id) }}')"
                                                 class="text-red-600 hover:text-red-800 transition-colors cursor-pointer"
@@ -91,7 +111,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="py-12 text-center text-slate-400">Tidak ada data ditemukan.
+                                    <td colspan="7" class="py-12 text-center text-slate-400">Tidak ada data ditemukan.
                                     </td>
                                 </tr>
                             @endforelse

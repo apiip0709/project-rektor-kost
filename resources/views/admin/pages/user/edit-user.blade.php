@@ -27,36 +27,38 @@
                 @method('PUT')
 
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-1">ID Pengguna</label>
-                    <input type="text" value="{{ $user->user_id }}" readonly
+                    <label for="user_id" class="block text-sm font-bold text-slate-700 mb-1">ID Pengguna</label>
+                    <input type="text" id="user_id" value="{{ $user->user_id }}" readonly
                         class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-500 cursor-not-allowed">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-1">Nama Lengkap</label>
-                    <input type="text" name="name" value="{{ old('name', $user->name) }}" required
+                    <label for="name" class="block text-sm font-bold text-slate-700 mb-1">Nama Lengkap</label>
+                    <input type="text" id="name" name="name" value="{{ old('name', $user->name) }}" required
                         class="w-full p-3 border border-slate-200 rounded-lg outline-none focus:border-slate-900">
                 </div>
 
-                @if ($user->register_method === 'google')
+                {{-- Email --}}
+                @if (!empty($user->email))
                     <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-1">Email (Akun Google)</label>
-                        <input type="email" name="email" value="{{ old('email', $user->email) }}" required
+                        <label for="email" class="block text-sm font-bold text-slate-700 mb-1">Email</label>
+                        <input type="email" id="email" name="email" value="{{ old('email', $user->email) }}"
                             class="w-full p-3 border border-slate-200 rounded-lg outline-none focus:border-slate-900">
                     </div>
                 @endif
 
-                @if ($user->register_method === 'whatsapp')
+                {{-- Nomor WhatsApp --}}
+                @if (!empty($user->phone))
                     <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-1">Nomor WhatsApp</label>
-                        <input type="text" name="phone" value="{{ old('phone', $user->phone) }}" required
+                        <label for="phone" class="block text-sm font-bold text-slate-700 mb-1">Nomor WhatsApp</label>
+                        <input type="text" id="phone" name="phone" value="{{ old('phone', $user->phone) }}"
                             class="w-full p-3 border border-slate-200 rounded-lg outline-none focus:border-slate-900">
                     </div>
                 @endif
 
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-1">Role</label>
-                    <select name="role"
+                    <label for="role" class="block text-sm font-bold text-slate-700 mb-1">Role</label>
+                    <select id="role" name="role"
                         class="w-full p-3 border border-slate-200 rounded-lg outline-none focus:border-slate-900">
                         <option value="pengguna" {{ old('role', $user->role) == 'pengguna' ? 'selected' : '' }}>Pengguna
                         </option>
@@ -66,10 +68,11 @@
                         </option>
                     </select>
                 </div>
-
+                
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-1">Password Baru</label>
-                    <input type="password" name="password" placeholder="Kosongkan jika tidak ingin mengubah password"
+                    <label for="password" class="block text-sm font-bold text-slate-700 mb-1">Password Baru</label>
+                    <input type="password" id="password" name="password"
+                        placeholder="Kosongkan jika tidak ingin mengubah password"
                         class="w-full p-3 border border-slate-200 rounded-lg outline-none focus:border-slate-900">
                     <p class="text-xs text-slate-400 mt-1">Min. 8 karakter jika diisi.</p>
                 </div>

@@ -76,7 +76,6 @@ Route::middleware('auth')->group(function () {
         // 🌟 KUNCI PERUBAHAN: Pasang Resource Kost & Room untuk Pemilik di sini
         // Menggunakan Controller yang sama dengan Superadmin, tapi URL-nya nanti /owner/kost
         Route::resource('kost', KostController::class);
-        // Route::resource('room', RoomController::class);
 
         // Route manual Anda untuk kamar bisa pelan-pelan dialihkan ke Resource di atas agar CRUD-nya otomatis
         Route::get('/kelola-kamar', function () {
