@@ -1,7 +1,7 @@
 @extends('admin.layouts.superadmin')
 
 @section('content')
-    <div class="max-w-2xl mx-auto mt-10">
+    <div class="max-w-2xl mx-auto">
         <div class="mb-4">
             <a href="{{ route('superadmin.user.index') }}"
                 class="text-sm text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-2">
@@ -51,14 +51,14 @@
                 @endif
 
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-1">Nama Lengkap</label>
-                    <input type="text" name="name" value="{{ old('name') }}" required
+                    <label for="name" class="block text-sm font-bold text-slate-700 mb-1">Nama Lengkap</label>
+                    <input type="text" id="name" name="name" value="{{ old('name') }}" required
                         class="w-full p-3 border border-slate-200 rounded-lg outline-none focus:border-slate-900">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-1">Role</label>
-                    <select name="role"
+                    <label for="role" class="block text-sm font-bold text-slate-700 mb-1">Role</label>
+                    <select id="role" name="role"
                         class="w-full p-3 border border-slate-200 rounded-lg outline-none focus:border-slate-900">
                         <option value="pengguna" {{ old('role') == 'pengguna' ? 'selected' : '' }}>Pengguna</option>
                         <option value="pemilik" {{ old('role') == 'pemilik' ? 'selected' : '' }}>Pemilik</option>
@@ -67,20 +67,20 @@
                 </div>
 
                 <div id="email-field" class="{{ old('register_method') == 'google' ? '' : 'hidden' }}">
-                    <label class="block text-sm font-bold text-slate-700 mb-1">Email</label>
-                    <input type="email" name="email" value="{{ old('email') }}"
+                    <label for="input-email" class="block text-sm font-bold text-slate-700 mb-1">Email</label>
+                    <input type="email" id="input-email" name="email" value="{{ old('email') }}"
                         class="w-full p-3 border border-slate-200 rounded-lg outline-none focus:border-slate-900">
                 </div>
 
                 <div id="phone-field" class="{{ old('register_method') == 'whatsapp' ? '' : 'hidden' }}">
-                    <label class="block text-sm font-bold text-slate-700 mb-1">Nomor WhatsApp</label>
-                    <input type="text" name="phone" value="{{ old('phone') }}"
+                    <label for="input-phone" class="block text-sm font-bold text-slate-700 mb-1">Nomor WhatsApp</label>
+                    <input type="text" id="input-phone" name="phone" value="{{ old('phone') }}"
                         class="w-full p-3 border border-slate-200 rounded-lg outline-none focus:border-slate-900">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-1">Password</label>
-                    <input type="password" name="password" required minlength="8"
+                    <label for="password" class="block text-sm font-bold text-slate-700 mb-1">Password</label>
+                    <input type="password" id="password" name="password" required minlength="8"
                         class="w-full p-3 border border-slate-200 rounded-lg outline-none focus:border-slate-900">
                 </div>
 
@@ -98,18 +98,27 @@
             document.getElementById('step-2').classList.remove('hidden');
             document.getElementById('register_method').value = method;
 
+            const emailInput = document.getElementById('input-email');
+            const phoneInput = document.getElementById('input-phone');
+
             if (method === 'google') {
                 document.getElementById('email-field').classList.remove('hidden');
                 document.getElementById('phone-field').classList.add('hidden');
+                emailInput.required = true;
+                phoneInput.required = false;
             } else {
                 document.getElementById('email-field').classList.add('hidden');
                 document.getElementById('phone-field').classList.remove('hidden');
+                emailInput.required = false;
+                phoneInput.required = true;
             }
         }
 
         function resetForm() {
             document.getElementById('step-1').classList.remove('hidden');
             document.getElementById('step-2').classList.add('hidden');
+            document.getElementById('input-email').required = false;
+            document.getElementById('input-phone').required = false;
         }
     </script>
 @endsection

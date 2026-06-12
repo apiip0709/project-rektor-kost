@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('pob')->nullable(); // Place of Birth (Tempat Lahir)
             $table->date('dob')->nullable();   // Date of Birth (Tanggal Lahir)
 
-            // Status tingkatan/level member owner
+            $table->enum('akun', ['aktif', 'menunggu', 'nonaktif'])->default('menunggu');
             $table->enum('status', ['premium', 'gold', 'silver'])->default('silver');
 
             $table->timestamps();

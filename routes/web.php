@@ -53,10 +53,10 @@ Route::middleware('auth')->group(function () {
             Route::get('/kost', [SuperadminController::class, 'kostIndex'])->name('kost.index');
 
             // 2. Rute Aksi Sisanya (Show, Edit, Update, Delete) dihandle oleh masing-masing Controller,
-            // TAPI wajib berikan perintah 'except' pada index agar Laravel tidak mencari fungsi index() yang sudah dihapus!
             Route::resource('user', UserController::class)->except(['index']);
             Route::resource('owner', OwnerController::class)->except(['index']);
             Route::resource('kost', KostController::class)->except(['index']);
+            Route::put('/owner/{owner_id}/update-status', [OwnerController::class, 'updateStatus'])->name('owner.updateStatus');
         });
     });
 

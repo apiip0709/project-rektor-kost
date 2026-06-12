@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Owner;
 
 class SuperadminController extends Controller
 {
@@ -33,10 +34,38 @@ class SuperadminController extends Controller
         return view('admin.pages.user.index-user', compact('users', 'keyword'));
     }
 
-    // Handle halaman Manajemen Pemilik
-    public function ownerIndex()
+    public function ownerIndex(Request $request)
     {
-        return view('admin.pages.owner.index-owner');
+        $keyword = $request->get('search');
+
+        // Panel verifikasi tetap tampil semua tanpa filter pencarian (agar admin selalu ingat ada yang perlu di-ACC)
+        $pendingOwners = Owner::where('akun', 'menunggu')->with('user')->get();
+
+        // Tabel pemilik menggunakan query dengan filter pencarian
+        $owners = Owner::query()
+            ->where('akun', '!=', 'menunggu')
+            ->with('user')
+            ->when($keyword, function ($query) use ($keyword) {
+                $query->where(function ($q) use ($keyword) {
+                    // Pencarian pada kolom tabel owners sendiri
+                    $q->where('owner_id', 'LIKE', "%{$keyword}%")
+                        ->orWhere('status', 'LIKE', "%{$keyword}%")
+                        ->orWhere('akun', 'LIKE', "%{$keyword}%")
+                        // Pencarian pada tabel relasi users
+                        ->orWhereHas('user', function ($u) use ($keyword) {
+                            $u->where('name', 'LIKE', "%{$keyword}%")
+                                ->orWhere('email', 'LIKE', "%{$keyword}%");
+                        });
+                });
+            })
+            ->orderBy('owner_id', 'asc')
+            ->paginate(10)
+            ->withQueryString();
+
+        // Menampilkan semua user dengan role 'user'
+        $users = User::where('role', 'pengguna')->get();
+
+        return view('admin.pages.owner.index-owner', compact('pendingOwners', 'owners', 'keyword', 'users'));
     }
 
     // Handle halaman Manajemen Properti (Kost)

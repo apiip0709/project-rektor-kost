@@ -38,5 +38,23 @@ class DatabaseSeeder extends Seeder
             'register_method' => 'google',
             'role'            => 'pengguna',
         ]);
+
+        User::create([
+            'user_id'         => 'USR-0003',
+            'name'            => 'A. Afif',
+            'phone'           => '089695096085',
+            'password'        => 'apiip777',
+            'register_method' => 'whatsapp',
+            'role'            => 'pengguna',
+        ]);
+
+        User::create([
+            'user_id'         => 'USR-0004',
+            'name'            => 'Kaia',
+            'email'           => 'kaiapart01@gmail.com',
+            'password'        => 'apiip777',
+            'register_method' => 'google',
+            'role'            => 'pengguna',
+        ]);
     }
 }

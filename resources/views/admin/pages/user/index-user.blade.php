@@ -18,8 +18,8 @@
         @endif
 
         <div>
-            <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Manajemen Registrasi</h1>
-            <p class="text-sm text-slate-500 mt-1">Kelola dan verifikasi pengguna.</p>
+            <h1 class="text-3xl font-bold text-slate-900">Manajemen Registrasi</h1>
+            <p class="text-sm text-slate-500">Kelola dan verifikasi pengguna.</p>
         </div>
 
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -73,15 +73,18 @@
                                     </td>
                                     <td class="py-4 px-4 text-slate-900">{{ $user->created_at->format('d M Y') }}</td>
                                     <td class="py-4 px-4">
-                                        <div class="flex justify-center items-center gap-2">
+                                        <div class="flex justify-center items-center gap-3">
                                             <a href="{{ route('superadmin.user.edit', $user->user_id) }}"
-                                                class="px-3 py-1.5 rounded-lg border border-amber-500 text-amber-600 hover:bg-amber-50 transition-colors font-bold text-xs">
-                                                Edit
+                                                class="text-amber-600 hover:text-amber-800 transition-colors"
+                                                title="Edit">
+                                                <i class="fa-solid fa-pen-to-square"></i>
                                             </a>
+
                                             <button type="button"
                                                 onclick="openDeleteModal('{{ route('superadmin.user.destroy', $user->user_id) }}')"
-                                                class="px-3 py-1.5 rounded-lg border cursor-pointer border-red-500 text-red-600 hover:bg-red-50 transition-colors font-bold text-xs">
-                                                Hapus
+                                                class="text-red-600 hover:text-red-800 transition-colors cursor-pointer"
+                                                title="Hapus">
+                                                <i class="fa-solid fa-trash-can"></i>
                                             </button>
                                         </div>
                                     </td>
