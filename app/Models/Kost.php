@@ -26,6 +26,7 @@ class Kost extends Model
         'facility',
         'latitude',
         'longitude',
+        'status_langganan',
         'status_kemitraan',
     ];
 

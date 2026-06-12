@@ -65,9 +65,21 @@ class SuperadminController extends Controller
     }
 
     // Handle halaman Manajemen Properti (Kost)
-    public function kostIndex()
+    public function kostIndex(Request $request)
     {
-        $kosts = Kost::with('owner')->get();
+        $keyword = $request->input('search');
+
+        // 1. Ambil data kost dengan relasi owner dan user di dalamnya
+        $kosts = Kost::with('owner.user')
+            ->when($keyword, function ($query) use ($keyword) {
+                $query->where('id_kost', 'like', "%{$keyword}%")
+                    ->orWhere('name_kost', 'like', "%{$keyword}%")
+                    ->orWhere('city', 'like', "%{$keyword}%");
+            })
+            ->get();
+
+        // 2. Ambil data owners beserta relasi ke usernya untuk kebutuhan modal
+        $owners = Owner::with('user')->get();
 
         $stats = [
             'total' => Kost::count(),
@@ -77,6 +89,6 @@ class SuperadminController extends Controller
             'silver' => Kost::where('status_langganan', 'silver')->count(),
         ];
 
-        return view('admin.pages.kost.index-kost', compact('kosts', 'stats'));
+        return view('admin.pages.kost.index-kost', compact('kosts', 'stats', 'owners', 'keyword'));
     }
 }

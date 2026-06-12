@@ -57,7 +57,7 @@
                                 <th class="py-3.5 px-4 text-left">HP</th>
                                 <th class="py-3.5 px-4 text-left">Metode Registrasi</th>
                                 <th class="py-3.5 px-4 text-left">Tanggal</th>
-                                <th class="py-3.5 px-4">Aksi</th>
+                                <th class="py-3.5 px-4">Tindakan</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 bg-white">

@@ -89,7 +89,7 @@
                             <th class="py-3 px-4">Nama</th>
                             <th class="py-3 px-4">Status Akun</th>
                             <th class="py-3 px-4">Status Langganan</th>
-                            <th class="py-3 px-4 text-center">Action</th>
+                            <th class="py-3 px-4 text-center">Tindakan</th>
                         </tr>
                     </thead>
                     <tbody id="table-body" class="divide-y divide-slate-100">
