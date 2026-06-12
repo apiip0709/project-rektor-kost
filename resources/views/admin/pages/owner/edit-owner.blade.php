@@ -3,9 +3,9 @@
 @section('content')
     <div class="max-w-2xl mx-auto">
         <div class="mb-4">
-            <a href="{{ route('superadmin.user.index') }}"
+            <a href="{{ route('superadmin.owner.index') }}"
                 class="text-sm text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-2">
-                <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar Pengguna
+                <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar Pemilik
             </a>
         </div>
 
@@ -46,14 +46,15 @@
                             </select>
                         </div>
 
-                        {{-- Tempat & Tanggal Lahir --}}
                         <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-1">Tempat, Tanggal Lahir</label>
+                            <span class="block text-sm font-bold text-slate-700 mb-1">Tempat, Tanggal Lahir</span>
                             <div class="flex gap-2">
                                 <input type="text" id="pob" name="pob" placeholder="Tempat Lahir"
-                                    value="{{ old('pob', $owner->pob) }}"
+                                    value="{{ old('pob', $owner->pob) }}" aria-label="Tempat Lahir"
                                     class="w-1/2 p-3 border border-slate-200 rounded-lg outline-none focus:border-slate-900">
+
                                 <input type="date" id="dob" name="dob" value="{{ old('dob', $owner->dob) }}"
+                                    aria-label="Tanggal Lahir"
                                     class="w-1/2 p-3 border border-slate-200 rounded-lg outline-none focus:border-slate-900">
                             </div>
                         </div>

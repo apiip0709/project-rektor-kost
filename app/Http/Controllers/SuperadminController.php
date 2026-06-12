@@ -38,23 +38,21 @@ class SuperadminController extends Controller
     {
         $keyword = $request->get('search');
 
-        // Panel verifikasi tetap tampil semua tanpa filter pencarian (agar admin selalu ingat ada yang perlu di-ACC)
         $pendingOwners = Owner::where('akun', 'menunggu')->with('user')->get();
 
-        // Tabel pemilik menggunakan query dengan filter pencarian
         $owners = Owner::query()
             ->where('akun', '!=', 'menunggu')
             ->with('user')
             ->when($keyword, function ($query) use ($keyword) {
                 $query->where(function ($q) use ($keyword) {
-                    // Pencarian pada kolom tabel owners sendiri
+                    // Pencarian pada kolom di tabel owners
                     $q->where('owner_id', 'LIKE', "%{$keyword}%")
                         ->orWhere('status', 'LIKE', "%{$keyword}%")
                         ->orWhere('akun', 'LIKE', "%{$keyword}%")
-                        // Pencarian pada tabel relasi users
+
+                        // Pencarian pada kolom nama di tabel user
                         ->orWhereHas('user', function ($u) use ($keyword) {
-                            $u->where('name', 'LIKE', "%{$keyword}%")
-                                ->orWhere('email', 'LIKE', "%{$keyword}%");
+                            $u->where('name', 'LIKE', "%{$keyword}%");
                         });
                 });
             })
@@ -62,9 +60,7 @@ class SuperadminController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        // Menampilkan semua user dengan role 'user'
         $users = User::where('role', 'pengguna')->get();
-
         return view('admin.pages.owner.index-owner', compact('pendingOwners', 'owners', 'keyword', 'users'));
     }
 

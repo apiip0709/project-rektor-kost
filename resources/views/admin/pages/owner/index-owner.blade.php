@@ -62,7 +62,7 @@
         </div>
 
         {{-- Tabel Pengguna --}}
-        <div id="tabel-container" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div id="tabel-wrapper" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <div
                 class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-slate-50/50">
                 <h2 class="font-bold text-slate-800 text-lg">Pengguna Terdaftar</h2>
@@ -82,25 +82,28 @@
             </div>
 
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm">
+                <table id="main-table" class="w-full text-left text-sm">
                     <thead class="bg-slate-50 text-slate-400 text-xs font-bold uppercase">
                         <tr>
                             <th class="py-3 px-4">ID Owner</th>
                             <th class="py-3 px-4">Nama</th>
                             <th class="py-3 px-4">Status Akun</th>
+                            <th class="py-3 px-4">Status Langganan</th>
                             <th class="py-3 px-4 text-center">Action</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
+                    <tbody id="table-body" class="divide-y divide-slate-100">
                         @foreach ($owners as $owner)
                             <tr class="hover:bg-slate-50 transition-colors">
                                 <td class="py-4 px-4 font-mono text-xs text-slate-500">{{ $owner->owner_id }}</td>
                                 <td class="py-4 px-4 font-bold text-slate-900">{{ $owner->user->name }}</td>
                                 <td class="py-4 px-4">
                                     <span
-                                        class="px-2 py-1 text-[10px] font-bold rounded-lg {{ $owner->akun == 'aktif' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700' }}">
-                                        {{ strtoupper($owner->akun) }}
-                                    </span>
+                                        class="px-2 py-1 text-[10px] font-bold rounded-lg {{ $owner->akun == 'aktif' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700' }}">{{ strtoupper($owner->akun) }}</span>
+                                </td>
+                                <td class="py-4 px-4">
+                                    <span
+                                        class="px-2 py-1 text-[10px] font-bold rounded-lg {{ $owner->status == 'premium' ? 'bg-purple-100 text-purple-700' : ($owner->status == 'gold' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600') }}">{{ strtoupper($owner->status ?? 'SILVER') }}</span>
                                 </td>
                                 <td class="py-4 px-4">
                                     <div class="flex items-center justify-center gap-3">
@@ -110,15 +113,10 @@
                                         <a href="{{ route('superadmin.owner.edit', $owner->owner_id) }}"
                                             class="text-amber-600 hover:text-amber-800 transition-colors" title="Edit"><i
                                                 class="fa-solid fa-pen-to-square"></i></a>
-
-                                        {{-- Tombol Status Dinamis (Semua menggunakan Modal) --}}
                                         <button type="button"
                                             onclick="openStatusModal('{{ route('superadmin.owner.updateStatus', $owner->owner_id) }}', '{{ $owner->akun === 'nonaktif' ? 'aktif' : 'nonaktif' }}')"
-                                            class="{{ $owner->akun === 'nonaktif' ? 'text-emerald-600 hover:text-emerald-800' : 'text-red-600 hover:text-red-800' }} transition-colors cursor-pointer"
-                                            title="{{ $owner->akun === 'nonaktif' ? 'Aktifkan' : 'Nonaktifkan' }}">
-                                            <i
-                                                class="fa-solid {{ $owner->akun === 'nonaktif' ? 'fa-circle-check' : 'fa-ban' }}"></i>
-                                        </button>
+                                            class="transition-colors cursor-pointer {{ $owner->akun === 'nonaktif' ? 'text-emerald-600 hover:text-emerald-800' : 'text-red-600 hover:text-red-800' }}"><i
+                                                class="fa-solid {{ $owner->akun === 'nonaktif' ? 'fa-circle-check' : 'fa-ban' }}"></i></button>
                                     </div>
                                 </td>
                             </tr>
@@ -129,7 +127,7 @@
         </div>
     </div>
 
-    {{-- Modal Konfirmasi Tunggal --}}
+    {{-- Modals & Scripts --}}
     <div id="statusModal"
         class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 animate-in fade-in zoom-in duration-200">
@@ -148,7 +146,6 @@
         </div>
     </div>
 
-    {{-- Modal Tambah User --}}
     <dialog id="userModal"
         class="p-0 rounded-2xl shadow-xl w-full max-w-lg backdrop:bg-slate-900/50 fixed inset-0 m-auto">
         <div class="p-6">
@@ -177,61 +174,53 @@
     </dialog>
 
     <script>
+        let debounceTimer;
+
+        // Live Search dengan Event Delegation
+        document.addEventListener('input', function(e) {
+            if (e.target && e.target.id === 'search-input') {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    fetch(
+                            `{{ route('superadmin.owner.index') }}?search=${encodeURIComponent(e.target.value)}`)
+                        .then(res => res.text())
+                        .then(html => {
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(html, 'text/html');
+                            const newBody = doc.getElementById('table-body');
+                            const currentBody = document.getElementById('table-body');
+                            if (newBody && currentBody) {
+                                currentBody.innerHTML = newBody.innerHTML;
+                            }
+                        });
+                }, 300);
+            }
+        });
+
+        // Modal Status
         function openStatusModal(url, type) {
             const form = document.getElementById('statusForm');
-            const title = document.getElementById('modalTitle');
-            const desc = document.getElementById('modalDesc');
             const btn = document.getElementById('modalBtn');
-            const input = document.getElementById('statusInput');
-            const modal = document.getElementById('statusModal');
-
             form.action = url;
-            input.value = type;
-
-            if (type === 'aktif') {
-                title.innerText = 'Konfirmasi Aktifkan';
-                desc.innerText = 'Apakah Anda yakin ingin mengaktifkan akun pemilik ini?';
-                btn.innerText = 'Ya, Aktifkan';
-                btn.className =
-                    'w-full px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg cursor-pointer text-sm font-bold text-white transition';
-            } else {
-                title.innerText = 'Konfirmasi Nonaktif';
-                desc.innerText = 'Apakah Anda yakin ingin menonaktifkan akun pemilik ini?';
-                btn.innerText = 'Ya, Nonaktifkan';
-                btn.className =
-                    'w-full px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg cursor-pointer text-sm font-bold text-white transition';
-            }
-            modal.classList.remove('hidden');
+            document.getElementById('statusInput').value = type;
+            document.getElementById('modalTitle').innerText = type === 'aktif' ? 'Konfirmasi Aktifkan' :
+                'Konfirmasi Nonaktif';
+            document.getElementById('modalDesc').innerText =
+                `Apakah Anda yakin ingin ${type === 'aktif' ? 'mengaktifkan' : 'menonaktifkan'} akun pemilik ini?`;
+            btn.innerText = type === 'aktif' ? 'Ya, Aktifkan' : 'Ya, Nonaktifkan';
+            btn.className =
+                `w-full px-4 py-2 rounded-lg cursor-pointer text-sm font-bold text-white transition ${type === 'aktif' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700'}`;
+            document.getElementById('statusModal').classList.remove('hidden');
         }
 
         function closeStatusModal() {
             document.getElementById('statusModal').classList.add('hidden');
         }
 
-        // Pencarian Tabel Utama (AJAX)
-        const searchInput = document.getElementById('search-input');
-        const container = document.getElementById('tabel-container');
-        let debounceTimer;
-
-        searchInput.addEventListener('keyup', function() {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                fetch(`{{ route('superadmin.owner.index') }}?search=${encodeURIComponent(this.value)}`)
-                    .then(res => res.text())
-                    .then(html => {
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(html, 'text/html');
-                        const newContent = doc.getElementById('tabel-container');
-                        if (newContent) container.innerHTML = newContent.innerHTML;
-                    });
-            }, 300);
-        });
-
-        // Pencarian Modal
+        // Search Modal
         document.getElementById('search-user-modal').addEventListener('keyup', function() {
             let filter = this.value.toLowerCase();
-            let items = document.querySelectorAll('#user-list > div');
-            items.forEach(item => {
+            document.querySelectorAll('#user-list > div').forEach(item => {
                 item.style.display = item.innerText.toLowerCase().includes(filter) ? 'flex' : 'none';
             });
         });

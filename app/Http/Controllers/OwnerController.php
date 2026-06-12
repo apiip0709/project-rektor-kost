@@ -70,12 +70,11 @@ class OwnerController extends Controller
             ->with('success', 'Data pemilik berhasil disimpan dan menunggu verifikasi.');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
-        //
+        $owner = Owner::with('user')->where('owner_id', $id)->firstOrFail();
+
+        return view('admin.pages.owner.show-owner', compact('owner'));
     }
 
     public function edit(string $id)
