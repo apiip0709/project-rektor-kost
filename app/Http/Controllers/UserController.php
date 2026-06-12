@@ -8,23 +8,11 @@ use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
-
-    public function show(User $user)
-    {
-        return view('admin.pages.user.show-user', compact('user'));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return view('admin.pages.user.create-user');
     }
 
-    /**
-     * Menyimpan data user baru ke database.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([

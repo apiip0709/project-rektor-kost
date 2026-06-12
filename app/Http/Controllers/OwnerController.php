@@ -78,20 +78,33 @@ class OwnerController extends Controller
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id)
     {
-        //
+        // Gunakan owner_id sebagai kriteria pencarian
+        $owner = Owner::with('user')->where('owner_id', $id)->firstOrFail();
+
+        return view('admin.pages.owner.edit-owner', compact('owner'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    // Gunakan type-hint 'Owner $owner' agar Laravel otomatis mengambil datanya
+    public function update(Request $request, Owner $owner)
     {
-        //
+        $request->validate([
+            'gender' => 'required',
+            'pob'    => 'required|string',
+            'dob'    => 'required|date',
+            'status' => 'required|in:silver,gold,premium',
+        ]);
+
+        // Anda tidak perlu mencari $owner lagi, Laravel sudah mencarikannya
+        $owner->update([
+            'gender' => $request->gender,
+            'pob'    => $request->pob,
+            'dob'    => $request->dob,
+            'status' => $request->status,
+        ]);
+
+        return redirect()->route('superadmin.owner.index')->with('success', 'Data berhasil diperbarui!');
     }
 
     /**
