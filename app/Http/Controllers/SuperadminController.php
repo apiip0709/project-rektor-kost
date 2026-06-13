@@ -68,18 +68,33 @@ class SuperadminController extends Controller
     public function kostIndex(Request $request)
     {
         $keyword = $request->input('search');
+        $langganan = $request->input('langganan'); // Array (dari checkbox)
+        $lokasi = $request->input('lokasi');      // String
+        $status = $request->input('status');      // String
 
-        // 1. Ambil data kost dengan relasi owner dan user di dalamnya
+        // 1. Ambil data kost dengan relasi owner dan user
         $kosts = Kost::with('owner.user')
             ->when($keyword, function ($query) use ($keyword) {
                 $query->where('id_kost', 'like', "%{$keyword}%")
                     ->orWhere('name_kost', 'like', "%{$keyword}%")
                     ->orWhere('city', 'like', "%{$keyword}%");
             })
+            ->when($langganan, function ($query) use ($langganan) {
+                $query->whereIn('status_langganan', $langganan);
+            })
+            ->when($lokasi, function ($query) use ($lokasi) {
+                $query->where('city', $lokasi);
+            })
+            ->when($status, function ($query) use ($status) {
+                $query->where('status_kemitraan', $status);
+            })
             ->get();
 
-        // 2. Ambil data owners beserta relasi ke usernya untuk kebutuhan modal
+        // 2. Ambil data owners beserta relasi ke usernya
         $owners = Owner::with('user')->get();
+
+        // 3. Ambil data lokasi unik untuk dropdown filter
+        $lokasiList = Kost::distinct()->pluck('city')->filter();
 
         $stats = [
             'total' => Kost::count(),
@@ -89,6 +104,6 @@ class SuperadminController extends Controller
             'silver' => Kost::where('status_langganan', 'silver')->count(),
         ];
 
-        return view('admin.pages.kost.index-kost', compact('kosts', 'stats', 'owners', 'keyword'));
+        return view('admin.pages.kost.index-kost', compact('kosts', 'stats', 'owners', 'keyword', 'lokasiList'));
     }
 }

@@ -29,14 +29,17 @@
                     entri
                 </div>
                 <div class="flex gap-2">
-                    <div class="relative flex-1 sm:w-72">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400"><i
-                                class="fa-solid fa-magnifying-glass text-sm"></i></span>
-                        <input type="text" id="search-input" value="{{ $keyword ?? '' }}"
-                            placeholder="Cari ID, Kost, atau Lokasi..."
+                    <div class="relative w-48">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                        </span>
+                        <input type="text" id="search-input" value="{{ $keyword ?? '' }}" placeholder="Cari ID, Kost..."
                             class="w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-4 text-sm outline-none focus:border-slate-400 transition-all">
                     </div>
-                    {{-- Tombol Pemicu Modal --}}
+                    <button type="button" onclick="filterModal.showModal()"
+                        class="px-4 py-2 border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition cursor-pointer">
+                        <i class="fa-solid fa-filter mr-2"></i>Filter
+                    </button>
                     <button type="button" onclick="ownerModal.showModal()"
                         class="flex items-center gap-2 rounded-xl bg-[#0F172A] px-4 py-2 text-sm font-bold text-white hover:bg-slate-800 transition-all shadow-sm whitespace-nowrap cursor-pointer">
                         <i class="fa-solid fa-plus text-xs"></i> Tambah Manual
@@ -142,6 +145,66 @@
                 @endforeach
             </div>
         </div>
+    </dialog>
+
+    {{-- Modal Filter --}}
+    <dialog id="filterModal"
+        class="p-0 rounded-2xl shadow-xl w-full max-w-sm backdrop:bg-slate-900/50 fixed inset-0 m-auto">
+        <form method="GET" action="{{ route('superadmin.kost.index') }}" class="p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-bold text-lg">Filter Properti</h3>
+                <button type="button" onclick="filterModal.close()"
+                    class="text-slate-400 hover:text-slate-600 cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                {{-- Tipe Langganan --}}
+                <div>
+                    <p class="text-xs font-bold text-slate-500 uppercase mb-2">Tipe Langganan</p>
+                    <div class="space-y-2">
+                        @foreach (['Premium', 'Gold', 'Silver'] as $tipe)
+                            {{-- Menggunakan label dengan for agar terikat ke checkbox --}}
+                            <label for="tipe_{{ strtolower($tipe) }}"
+                                class="flex items-center gap-2 text-sm cursor-pointer hover:text-slate-900 transition">
+                                <input type="checkbox" id="tipe_{{ strtolower($tipe) }}" name="langganan[]"
+                                    value="{{ strtolower($tipe) }}" class="rounded border-slate-300 cursor-pointer">
+                                {{ $tipe }}
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                {{-- Lokasi --}}
+                <div>
+                    <label for="lokasi" class="block text-xs font-bold text-slate-500 uppercase mb-2">Lokasi</label>
+                    <select id="lokasi" name="lokasi"
+                        class="w-full rounded-xl border border-slate-200 py-2 px-3 text-sm cursor-pointer outline-none focus:border-slate-400">
+                        <option value="">Semua Lokasi</option>
+                    </select>
+                </div>
+
+                {{-- Status --}}
+                <div>
+                    <label for="status" class="block text-xs font-bold text-slate-500 uppercase mb-2">Status
+                        Properti</label>
+                    <select id="status" name="status"
+                        class="w-full rounded-xl border border-slate-200 py-2 px-3 text-sm cursor-pointer outline-none focus:border-slate-400">
+                        <option value="">Semua Status</option>
+                        <option value="aktif">Aktif</option>
+                        <option value="tidak_aktif">Tidak Aktif</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-8 flex gap-2">
+                <button type="button" onclick="filterModal.close()"
+                    class="flex-1 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer transition">Batal</button>
+                <button type="submit"
+                    class="flex-1 py-2 text-sm font-bold text-white bg-[#0F172A] rounded-xl cursor-pointer hover:bg-slate-800 transition">Terapkan</button>
+            </div>
+        </form>
     </dialog>
 
     <script>
