@@ -122,8 +122,11 @@
                                                 class="fa-solid fa-pen-to-square"></i></a>
                                         <button type="button"
                                             onclick="openStatusModal('{{ route('superadmin.owner.updateStatus', $owner->owner_id) }}', '{{ $owner->akun === 'nonaktif' ? 'aktif' : 'nonaktif' }}')"
-                                            class="transition-colors cursor-pointer {{ $owner->akun === 'nonaktif' ? 'text-emerald-600 hover:text-emerald-800' : 'text-red-600 hover:text-red-800' }}"><i
-                                                class="fa-solid {{ $owner->akun === 'nonaktif' ? 'fa-circle-check' : 'fa-ban' }}"></i></button>
+                                            title="{{ $owner->akun === 'nonaktif' ? 'Aktifkan' : 'Nonaktifkan' }}"
+                                            class="transition-colors cursor-pointer {{ $owner->akun === 'nonaktif' ? 'text-emerald-600 hover:text-emerald-800' : 'text-red-600 hover:text-red-800' }}">
+                                            <i
+                                                class="fa-solid {{ $owner->akun === 'nonaktif' ? 'fa-circle-check' : 'fa-ban' }}"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -190,7 +193,7 @@
                 debounceTimer = setTimeout(() => {
                     fetch(
                             `{{ route('superadmin.owner.index') }}?search=${encodeURIComponent(e.target.value)}`
-                            )
+                        )
                         .then(res => res.text())
                         .then(html => {
                             const parser = new DOMParser();

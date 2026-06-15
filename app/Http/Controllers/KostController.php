@@ -83,7 +83,11 @@ class KostController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $kost = Kost::with(['owner.user', 'rooms'])->where('kost_id', $id)->firstOrFail();
+
+        $owners = Owner::with('user')->get();
+
+        return view('admin.pages.kost.edit-kost', compact('kost', 'owners'));
     }
 
     /**
