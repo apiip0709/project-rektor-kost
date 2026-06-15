@@ -22,6 +22,8 @@ class Owner extends Model
         'dob',
         'akun',
         'status',
+        'temp_email',
+        'temp_phone',
     ];
 
     protected static function booted()

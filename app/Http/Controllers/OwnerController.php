@@ -11,34 +11,30 @@ class OwnerController extends Controller
     public function updateStatus(Request $request, string $owner_id)
     {
         $request->validate([
-            'akun'  => 'required|in:aktif,menunggu,nonaktif',
-            'email' => 'nullable|email',
-            'phone' => 'nullable|string',
+            'akun' => 'required|in:aktif,menunggu,nonaktif',
         ]);
 
         $owner = Owner::where('owner_id', $owner_id)->firstOrFail();
         $user  = $owner->user;
 
-        // Pastikan relasi sudah benar dan data ada
-        $user->update([
-            'email' => $request->filled('email') ? $request->email : $user->email,
-            'phone' => $request->filled('phone') ? $request->phone : $user->phone,
-        ]);
+        // Update status di tabel owner
+        $owner->update(['akun' => $request->akun]);
 
-        // 2. Update status akun
-        $owner->update([
-            'akun' => $request->akun
-        ]);
-
-        // 3. Update role
+        // Jika diterima, ambil data dari kolom 'temp_' dan pindahkan ke 'users'
         if ($request->akun === 'aktif') {
-            $user->update(['role' => 'pemilik']);
-        } elseif ($request->akun === 'nonaktif') {
+            $user->update([
+                'role'  => 'pemilik',
+                // Gunakan data dari kolom 'temp_' jika ada, jika tidak gunakan data lama
+                'email' => $owner->temp_email ?? $user->email,
+                'phone' => $owner->temp_phone ?? $user->phone,
+            ]);
+        } else {
+            // Jika ditolak, role kembali ke pengguna
             $user->update(['role' => 'pengguna']);
         }
 
         return redirect()->route('superadmin.owner.index')
-            ->with('success', 'Data kontak dan status berhasil diperbarui!');
+            ->with('success', 'Status berhasil diperbarui!');
     }
 
     public function create(Request $request)
@@ -62,11 +58,15 @@ class OwnerController extends Controller
             'tanggal_lahir' => 'required|date',
         ]);
 
+        // Tambahkan temp_email dan temp_phone di sini
         Owner::create([
-            'user_id'  => $user->user_id,
-            'gender'   => strtolower($request->jenis_kelamin),
-            'pob'      => $request->tempat_lahir,
-            'dob'      => $request->tanggal_lahir,
+            'user_id'       => $user->user_id,
+            'gender'        => strtolower($request->jenis_kelamin),
+            'pob'           => $request->tempat_lahir,
+            'dob'           => $request->tanggal_lahir,
+            'temp_email'    => $request->email, // Data dari form
+            'temp_phone'    => $request->phone, // Data dari form
+            'akun'          => 'menunggu',
         ]);
 
         return redirect()->route('superadmin.owner.index')
