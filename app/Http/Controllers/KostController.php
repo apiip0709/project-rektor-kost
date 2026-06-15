@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Kost;
 use App\Models\Room;
 use App\Models\Owner;
+use Illuminate\Support\Facades\Storage;
 
 class KostController extends Controller
 {
@@ -91,14 +92,57 @@ class KostController extends Controller
 
         return view('admin.pages.kost.edit-kost', compact('kost', 'owners'));
     }
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    
+    public function update(Request $request, $id)
     {
-        //
-    }
+        $kost = Kost::findOrFail($id);
 
+        // 1. Validasi
+        $request->validate([
+            'name_kost' => 'required|string|max:255',
+            'img_kost.*' => 'image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        // 2. Handle Gambar (Hapus yang lama jika ada di input 'removed_images')
+        $currentImages = json_decode($kost->img_kost, true) ?? [];
+        $removedImages = json_decode($request->removed_images, true) ?? [];
+
+        // Hapus file fisik dari storage
+        foreach ($removedImages as $path) {
+            if (Storage::exists('public/' . $path)) {
+                Storage::delete('public/' . $path);
+            }
+        }
+        
+        // Filter array gambar yang tersisa
+        $remainingImages = array_values(array_diff($currentImages, $removedImages));
+
+        // 3. Handle Upload Gambar Baru
+        if ($request->hasFile('img_kost')) {
+            foreach ($request->file('img_kost') as $file) {
+                $path = $file->store('kost', 'public');
+                $remainingImages[] = $path;
+            }
+        }
+
+        // 4. Update Data Kost
+        $kost->update([
+            'name_kost'    => $request->name_kost,
+            'klasifikasi'  => $request->klasifikasi,
+            'city'         => $request->city,
+            'address'      => $request->address,
+            'latitude'     => $request->latitude,
+            'longitude'    => $request->longitude,
+            'description'  => $request->description,
+            'campus'       => $request->campuses_data, // Data sudah berupa JSON string dari form
+            'facility'     => $request->facilities_data, // Data sudah berupa JSON string dari form
+            'img_kost'     => json_encode($remainingImages),
+        ]);
+
+        // 5. Redirect kembali ke halaman edit dengan pesan sukses
+        return redirect()->route('superadmin.kost.edit', $id)
+                         ->with('success', 'Data kost berhasil diperbarui!');
+    }
     /**
      * Remove the specified resource from storage.
      */

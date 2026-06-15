@@ -166,12 +166,8 @@
     {{-- Modal Kampus --}}
     <dialog id="kampusModal"
         class="p-0 rounded-2xl shadow-xl w-full max-w-xs backdrop:bg-slate-900/50 fixed inset-0 m-auto">
-        <div class="p-6 relative">
+        <div class="p-6">
             <h3 class="font-bold text-lg mb-4">Pilih Kampus</h3>
-            <button type="button" onclick="this.closest('dialog').close()"
-                class="absolute top-4 right-4 text-slate-400 hover:text-slate-900 transition-colors p-2 cursor-pointer">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
             <div class="space-y-3">
                 @foreach (['Unhas', 'Pnup', 'Unitama', 'Undipa', 'Cokro'] as $c)
                     <label class="flex items-center gap-3 cursor-pointer hover:text-blue-600">

@@ -1,7 +1,22 @@
 @extends('admin.layouts.superadmin')
 
 @section('content')
-    <div class="max-w-2xl mx-auto">
+    <div class="max-w-7xl mx-auto">
+        {{-- Notifikasi Sukses --}}
+        @if (session('success'))
+            <div id="success-alert"
+                class="bg-emerald-50 border-l-4 border-emerald-500 text-emerald-700 p-4 rounded-lg shadow-sm flex justify-between items-center mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <p class="text-sm font-medium">{{ session('success') }}</p>
+                </div>
+                <button onclick="document.getElementById('success-alert').remove()"
+                    class="text-emerald-600 hover:text-emerald-800 cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        @endif
+
         <div class="mb-4">
             <a href="{{ route('superadmin.kost.index') }}"
                 class="text-sm text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-2 cursor-pointer mb-4">
@@ -9,144 +24,146 @@
             </a>
         </div>
 
-        <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
-            <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight mb-6">Edit Data Kost</h1>
+        {{-- Layout Grid 1:3 --}}
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
 
-            <form id="kostForm" action="{{ route('superadmin.kost.update', $kost->kost_id) }}" method="POST"
-                enctype="multipart/form-data" class="space-y-4">
-                @csrf
-                @method('PUT')
+            {{-- KOLOM KIRI (1 Bagian): EDIT FORM --}}
+            <div class="lg:col-span-1 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm sticky top-6">
+                <h1 class="text-xl font-extrabold text-slate-800 tracking-tight mb-5">Edit Data Kost</h1>
 
-                <input type="hidden" name="owner_id" value="{{ $kost->owner_id ?? '' }}">
+                <form id="kostForm" action="{{ route('superadmin.kost.update', $kost->kost_id) }}" method="POST"
+                    enctype="multipart/form-data" class="space-y-4">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="owner_id" value="{{ $kost->owner_id ?? '' }}">
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {{-- Kolom Kiri --}}
-                    <div class="space-y-4">
+                    {{-- Nama Kost --}}
+                    <div>
+                        <label for="name_kost" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nama
+                            Kost</label>
+                        <input type="text" id="name_kost" name="name_kost"
+                            value="{{ old('name_kost', $kost->name_kost) }}" required
+                            class="w-full rounded-xl border border-slate-200 py-2 px-3 text-sm focus:ring-2 focus:ring-slate-900 outline-none transition">
+                    </div>
+
+                    {{-- Klasifikasi --}}
+                    <div>
+                        <label for="klasifikasi"
+                            class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Klasifikasi</label>
+                        <select id="klasifikasi" name="klasifikasi"
+                            class="w-full cursor-pointer rounded-xl border border-slate-200 py-2 px-3 text-sm bg-white outline-none">
+                            @foreach (['putra', 'putri', 'campur'] as $k)
+                                <option value="{{ $k }}" {{ $kost->klasifikasi == $k ? 'selected' : '' }}>
+                                    {{ ucfirst($k) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Kota --}}
+                    <div>
+                        <label for="city" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Kota</label>
+                        <select id="city" name="city"
+                            class="w-full cursor-pointer rounded-xl border border-slate-200 py-2 px-3 text-sm bg-white outline-none">
+                            <option value="makassar" {{ $kost->city == 'makassar' ? 'selected' : '' }}>Makassar</option>
+                            <option value="gowa" {{ $kost->city == 'gowa' ? 'selected' : '' }}>Gowa</option>
+                        </select>
+                    </div>
+
+                    {{-- Alamat --}}
+                    <div>
+                        <label for="address" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Alamat
+                            Lengkap</label>
+                        <textarea id="address" name="address" rows="2" required
+                            class="w-full rounded-xl border border-slate-200 py-2 px-3 text-sm outline-none transition">{{ old('address', $kost->address) }}</textarea>
+                    </div>
+
+                    {{-- Titik Koordinat (Dipisah Kiri & Kanan) --}}
+                    <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label for="name_kost" class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Nama
-                                Kost</label>
-                            <input type="text" id="name_kost" name="name_kost"
-                                value="{{ old('name_kost', $kost->name_kost) }}" required
-                                class="w-full rounded-xl border border-slate-200 py-2.5 px-4 focus:ring-2 focus:ring-blue-50 focus:border-blue-400 outline-none transition">
+                            <label for="latitude"
+                                class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Latitude</label>
+                            <input type="text" id="latitude" name="latitude"
+                                value="{{ old('latitude', $kost->latitude ?? '') }}" placeholder="-5.1332"
+                                class="w-full rounded-xl border border-slate-200 py-2 px-3 text-sm outline-none transition">
                         </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="flex flex-col">
-                                <label for="klasifikasi"
-                                    class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Klasifikasi</label>
-                                <select id="klasifikasi" name="klasifikasi"
-                                    class="w-full cursor-pointer rounded-xl border border-slate-200 py-2.5 px-3 bg-white">
-                                    @foreach (['putra', 'putri', 'campur'] as $k)
-                                        <option value="{{ $k }}"
-                                            {{ $kost->klasifikasi == $k ? 'selected' : '' }}>{{ ucfirst($k) }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="flex flex-col">
-                                <label for="city"
-                                    class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Kota</label>
-                                <select id="city" name="city"
-                                    class="w-full cursor-pointer rounded-xl border border-slate-200 py-2.5 px-3 bg-white">
-                                    <option value="makassar" {{ $kost->city == 'makassar' ? 'selected' : '' }}>Makassar
-                                    </option>
-                                    <option value="gowa" {{ $kost->city == 'gowa' ? 'selected' : '' }}>Gowa</option>
-                                </select>
-                            </div>
-                        </div>
-
                         <div>
-                            <label for="address" class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Alamat
-                                Lengkap</label>
-                            <textarea id="address" name="address" rows="3" required
-                                class="w-full rounded-xl border border-slate-200 py-2.5 px-4 text-sm focus:ring-2 focus:ring-blue-50 focus:border-blue-400 outline-none transition">{{ old('address', $kost->address) }}</textarea>
-                        </div>
-
-                        {{-- Kampus & Fasilitas tidak perlu 'for' jika menggunakan tombol pemicu modal --}}
-                        <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-[11px] font-bold text-slate-400 uppercase">Kampus Sekitar</span>
-                                <button type="button" onclick="kampusModal.showModal()"
-                                    class="text-[10px] cursor-pointer font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">Ubah</button>
-                            </div>
-                            <div id="selected-campuses"
-                                class="w-full p-3 border border-slate-200 rounded-xl bg-slate-50/30">
-                                <span
-                                    class="text-sm">{{ is_array($cList = json_decode($kost->campus)) ? implode(', ', $cList) : $kost->campus }}</span>
-                            </div>
-                            <input type="hidden" name="campuses_data" id="campuses_data" value="{{ $kost->campus }}">
-                        </div>
-
-                        <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-[11px] font-bold text-slate-400 uppercase">Fasilitas Umum</span>
-                                <button type="button" onclick="fasilitasModal.showModal()"
-                                    class="text-[10px] cursor-pointer font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">Ubah</button>
-                            </div>
-                            <div id="selected-facilities"
-                                class="w-full p-3 border border-slate-200 rounded-xl bg-slate-50/30">
-                                <span
-                                    class="text-sm">{{ is_array($fList = json_decode($kost->facility)) ? implode(', ', $fList) : $kost->facility }}</span>
-                            </div>
-                            <input type="hidden" name="facilities_data" id="facilities_data"
-                                value="{{ $kost->facility }}">
+                            <label for="longitude"
+                                class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Longitude</label>
+                            <input type="text" id="longitude" name="longitude"
+                                value="{{ old('longitude', $kost->longitude ?? '') }}" placeholder="119.4883"
+                                class="w-full rounded-xl border border-slate-200 py-2 px-3 text-sm outline-none transition">
                         </div>
                     </div>
 
-                    {{-- Kolom Kanan --}}
-                    <div class="space-y-4">
-                        <div>
-                            <span class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Foto Properti</span>
-                            <div id="preview-container" class="grid grid-cols-3 gap-2 mb-3">
-                                @foreach ((array) json_decode($kost->img_kost) as $index => $img)
-                                    <div class="relative group">
-                                        <img src="{{ asset('storage/' . $img) }}" alt="Foto Kost {{ $index + 1 }}"
-                                            class="w-full h-20 object-cover rounded-xl border">
-                                        <button type="button" onclick="removeExisting(this)"
-                                            data-path="{{ $img }}"
-                                            class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <i class="fa-solid fa-xmark"></i>
-                                        </button>
-                                    </div>
-                                @endforeach
-                            </div>
-                            <button type="button" onclick="document.getElementById('file-input').click()"
-                                class="w-full py-2.5 cursor-pointer border border-dashed border-slate-300 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50">Tambah/Ganti
-                                Foto</button>
-                            <input type="file" id="file-input" name="img_kost[]" multiple class="hidden"
-                                accept="image/*">
-                            <input type="hidden" name="removed_images" id="removed_images" value="[]">
+                    {{-- Foto --}}
+                    <div>
+                        <span class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Foto Properti</span>
+                        <div id="preview-container" class="grid grid-cols-3 gap-2 mb-2">
+                            @foreach ((array) json_decode($kost->img_kost) as $index => $img)
+                                <div class="relative group">
+                                    <img src="{{ asset('storage/' . $img) }}" alt="Foto properti kost"
+                                        class="w-full h-14 object-cover rounded-lg border">
+                                    <button type="button" onclick="removeExisting(this)" data-path="{{ $img }}"
+                                        class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[8px] cursor-pointer opacity-0 group-hover:opacity-100"><i
+                                            class="fa-solid fa-xmark"></i></button>
+                                </div>
+                            @endforeach
                         </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label for="latitude"
-                                    class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Latitude</label>
-                                <input type="number" id="latitude" step="any" name="latitude"
-                                    value="{{ $kost->latitude }}" required
-                                    class="w-full rounded-xl border border-slate-200 py-2.5 px-4 text-sm outline-none">
-                            </div>
-                            <div>
-                                <label for="longitude"
-                                    class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Longitude</label>
-                                <input type="number" id="longitude" step="any" name="longitude"
-                                    value="{{ $kost->longitude }}" required
-                                    class="w-full rounded-xl border border-slate-200 py-2.5 px-4 text-sm outline-none">
-                            </div>
-                        </div>
-                        <div>
-                            <label for="description"
-                                class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Deskripsi</label>
-                            <textarea id="description" name="description" rows="5" required
-                                class="w-full rounded-xl border border-slate-200 py-2.5 px-4 text-sm outline-none">{{ old('description', $kost->description) }}</textarea>
-                        </div>
+                        <button type="button" onclick="document.getElementById('file-input').click()"
+                            class="w-full py-2 border border-dashed border-slate-300 rounded-xl text-[10px] font-bold text-slate-500 hover:bg-slate-50 transition cursor-pointer">
+                            + Tambah Foto
+                        </button>
+                        <input type="file" id="file-input" name="img_kost[]" multiple class="hidden" accept="image/*">
                     </div>
-                </div>
 
-                <button type="submit"
-                    class="w-full bg-[#0F172A] text-white font-bold py-3 rounded-lg hover:bg-slate-800 transition-all cursor-pointer mt-6">
-                    Simpan Perubahan
-                </button>
-            </form>
+                    {{-- Kampus Sekitar --}}
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Kampus Sekitar</span>
+                            <button type="button" onclick="kampusModal.showModal()"
+                                class="text-[9px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded cursor-pointer">Ubah</button>
+                        </div>
+                        <div id="selected-campuses"
+                            class="w-full p-2 border border-slate-200 rounded-xl bg-slate-50 text-xs min-h-[36px]">
+                            {{ is_array($cList = json_decode($kost->campus)) ? implode(', ', $cList) : $kost->campus }}
+                        </div>
+                        <input type="hidden" name="campuses_data" id="campuses_data" value="{{ $kost->campus }}">
+                    </div>
+
+                    {{-- Fasilitas Umum --}}
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Fasilitas Umum</span>
+                            <button type="button" onclick="fasilitasModal.showModal()"
+                                class="text-[9px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded cursor-pointer">Ubah</button>
+                        </div>
+                        <div id="selected-facilities"
+                            class="w-full p-2 border border-slate-200 rounded-xl bg-slate-50 text-xs min-h-[36px]">
+                            {{ is_array($fList = json_decode($kost->facility)) ? implode(', ', $fList) : $kost->facility }}
+                        </div>
+                        <input type="hidden" name="facilities_data" id="facilities_data"
+                            value="{{ $kost->facility }}">
+                    </div>
+
+                    {{-- Deskripsi Kost --}}
+                    <div>
+                        <label for="desc" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Deskripsi
+                            Kost</label>
+                        <textarea id="desc" name="description" rows="4" required
+                            class="w-full rounded-xl border border-slate-200 py-2 px-3 text-sm focus:ring-2 focus:ring-slate-900 outline-none transition">{{ old('description', $kost->description ?? '') }}</textarea>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full bg-[#0F172A] text-white font-bold text-sm py-3 rounded-xl hover:bg-slate-800 transition cursor-pointer mt-2">
+                        Simpan Perubahan
+                    </button>
+                </form>
+            </div>
+
+            {{-- KOLOM KANAN --}}
+            <div class="lg:col-span-3">
+                @include('admin.pages.kost.room-card')
+            </div>
         </div>
     </div>
 
