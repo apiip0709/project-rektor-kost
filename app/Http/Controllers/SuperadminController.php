@@ -104,6 +104,8 @@ class SuperadminController extends Controller
             'silver' => Kost::where('status_langganan', 'silver')->count(),
         ];
 
-        return view('admin.pages.kost.index-kost', compact('kosts', 'stats', 'owners', 'keyword', 'lokasiList'));
+        $cities = Kost::distinct()->pluck('city')->filter();
+
+        return view('admin.pages.kost.index-kost', compact('kosts', 'stats', 'owners', 'keyword', 'lokasiList', 'cities'));
     }
 }

@@ -25,17 +25,20 @@ class KostController extends Controller
     {
         // 1. Validasi Input
         $request->validate([
-            'name_kost'    => 'required|string|max:255',
-            'klasifikasi'  => 'required',
-            'city'         => 'required',
-            'campus'       => 'required',
-            'address'      => 'required',
-            'img_kost.*'   => 'image|mimes:jpeg,png,jpg|max:2048',
-            'facility'     => 'nullable|array',
-            'description'  => 'nullable|string',
+            'name_kost'       => 'required|string|max:255',
+            'klasifikasi'     => 'required',
+            'city'            => 'required',
+            'campuses_data'   => 'required', // Harus sesuai dengan name di form
+            'facilities_data' => 'required', // Harus sesuai dengan name di form
+            'address'         => 'required',
+            'img_kost'        => 'required',
+            'img_kost.*'      => 'image|mimes:jpeg,png,jpg|max:2048',
+            'description'     => 'nullable|string',
+            'latitude'        => 'required',
+            'longitude'       => 'required',
         ]);
 
-        // Proses upload gambar ...
+        // 2. Proses upload gambar
         $imagePaths = [];
         if ($request->hasFile('img_kost')) {
             foreach ($request->file('img_kost') as $image) {
@@ -43,26 +46,27 @@ class KostController extends Controller
             }
         }
 
-        // Simpan ke Database
+        // 3. Simpan ke Database
+        // Karena kita mengirim data sebagai JSON dari input hidden,
+        // kita simpan langsung apa adanya atau di-decode sesuai kebutuhan database Anda
         Kost::create([
-            // Mengambil dari input hidden, jika tidak ada (null) akan tetap tersimpan sebagai null
             'owner_id'         => $request->owner_id,
-
             'name_kost'        => $request->name_kost,
             'klasifikasi'      => $request->klasifikasi,
             'city'             => $request->city,
-            'campus'           => $request->campus,
+            'campus'           => $request->campuses_data, // Sesuai dengan field di form
+            'facility'         => $request->facilities_data, // Sesuai dengan field di form
             'address'          => $request->address,
             'description'      => $request->description,
-            'img_kost'         => $imagePaths,
-            'facility'         => $request->facility,
+            'img_kost'         => json_encode($imagePaths), // Pastikan formatnya sesuai (JSON atau String)
             'latitude'         => $request->latitude,
             'longitude'        => $request->longitude,
             'status_langganan' => 'silver',
             'status_kemitraan' => 'aktif',
         ]);
 
-        return redirect()->route('superadmin.kost.index') // Sesuaikan route index Anda
+        // 4. Redirect ke halaman index dengan pesan sukses
+        return redirect()->route('superadmin.kost.index')
             ->with('success', 'Data properti berhasil ditambahkan!');
     }
 

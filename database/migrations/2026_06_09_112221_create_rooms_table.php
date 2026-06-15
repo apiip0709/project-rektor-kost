@@ -12,9 +12,9 @@ return new class extends Migration
             // id_room sebagai primary key berformat string (Contoh: 0001-01)
             $table->string('id_room')->primary();
             
-            // Relasi ke tabel kosts (Foreign key menggunakan string id_kost)
+            // Relasi ke tabel kosts (Foreign key menggunakan string kost_id)
             $table->string('kost_id');
-            $table->foreign('kost_id')->references('id_kost')->on('kosts')->onDelete('cascade');
+            $table->foreign('kost_id')->references('kost_id')->on('kosts')->onDelete('cascade');
             
             $table->string('no_room');
             $table->string('size_room');

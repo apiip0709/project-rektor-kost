@@ -2,7 +2,20 @@
 
 @section('content')
     <div class="flex flex-col gap-6">
-        {{-- Header & Stats Cards (Sama seperti sebelumnya) --}}
+        @if (session('success'))
+            <div id="success-alert"
+                class="bg-emerald-50 border-l-4 border-emerald-500 text-emerald-700 p-4 rounded-lg shadow-sm flex justify-between items-center animate-in fade-in slide-in-from-top-2 duration-300">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <p class="text-sm font-medium">{{ session('success') }}</p>
+                </div>
+                <button onclick="document.getElementById('success-alert').remove()"
+                    class="text-emerald-600 hover:text-emerald-800 cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        @endif
+
         <div class="mb-2">
             <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Data Operasional Properti</h1>
             <p class="text-sm text-slate-500 mt-1">Kelola seluruh listing properti kost di platform Rektor-Kost.</p>
@@ -51,24 +64,30 @@
                 <table id="main-table" class="w-full text-left text-sm">
                     <thead class="bg-slate-50 text-slate-400 text-xs font-bold uppercase">
                         <tr>
-                            <th class="py-3 px-4">ID</th>
-                            <th class="py-3 px-4">Info Properti</th>
-                            <th class="py-3 px-4">Langganan</th>
-                            <th class="py-3 px-4">Lokasi</th>
-                            <th class="py-3 px-4">Status</th>
-                            <th class="py-3 px-4">Tindakan</th>
+                            <th class="py-3 px-4 text-left">ID</th>
+                            <th class="py-3 px-4 text-left">Info Properti</th>
+                            <th class="py-3 px-4 text-left">Langganan</th>
+                            <th class="py-3 px-4 text-left">Lokasi</th>
+                            <th class="py-3 px-4 text-left">Status</th>
+                            <th class="py-3 px-4 text-center">Tindakan</th>
                         </tr>
                     </thead>
                     <tbody id="table-body" class="divide-y divide-slate-100">
                         @foreach ($kosts as $kost)
                             <tr class="hover:bg-slate-50">
-                                <td class="py-4 px-4 font-mono text-xs text-slate-500">{{ $kost->id_kost }}</td>
+                                <td class="py-4 px-4 font-mono text-xs text-slate-500">{{ $kost->kost_id }}</td>
                                 <td class="py-4 px-4">
                                     <div class="flex items-center gap-3">
                                         <div
-                                            class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-400">
-                                            <i class="fa-solid fa-image"></i>
+                                            class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-400 overflow-hidden">
+                                            @if (isset($kost->images[0]))
+                                                <img src="{{ asset('storage/' . $kost->images[0]) }}"
+                                                    alt="{{ $kost->name_kost }}" class="w-full h-full object-cover">
+                                            @else
+                                                <i class="fa-solid fa-image"></i>
+                                            @endif
                                         </div>
+
                                         <div>
                                             <p class="font-bold text-slate-900">{{ $kost->name_kost }}</p>
                                             <p class="text-[10px] text-slate-500">{{ count($kost->rooms ?? []) }} Kamar •
@@ -88,8 +107,18 @@
                                         <span class="text-slate-600">{{ ucfirst($kost->status_kemitraan) }}</span>
                                     </div>
                                 </td>
-                                <td class="py-4 px-4">
-                                    <a href="#" class="text-blue-600 font-bold hover:underline">Edit</a>
+                                {{-- Ubah bagian ini --}}
+                                <td class="py-4 px-4 text-center">
+                                    <div class="flex items-center justify-center gap-3">
+                                        <a href="{{ route('superadmin.kost.show', $kost->kost_id) }}"
+                                            class="text-blue-600 hover:text-blue-800 transition-colors" title="Lihat">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </a>
+                                        <a href="{{ route('superadmin.kost.edit', $kost->kost_id) }}"
+                                            class="text-amber-600 hover:text-amber-800 transition-colors" title="Edit">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
@@ -182,6 +211,11 @@
                     <select id="lokasi" name="lokasi"
                         class="w-full rounded-xl border border-slate-200 py-2 px-3 text-sm cursor-pointer outline-none focus:border-slate-400">
                         <option value="">Semua Lokasi</option>
+                        @foreach ($cities as $city)
+                            <option value="{{ $city }}" {{ request('lokasi') == $city ? 'selected' : '' }}>
+                                {{ ucfirst($city) }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
 
