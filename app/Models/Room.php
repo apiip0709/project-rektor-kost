@@ -10,12 +10,12 @@ class Room extends Model
     use HasFactory;
 
     // Proteksi primary key kustom bertipe string
-    protected $primaryKey = 'id_room';
+    protected $primaryKey = 'room_id';
     public $incrementing = false;
     protected $keyType = 'string';
 
     protected $fillable = [
-        'id_room',
+        'room_id',
         'kost_id',
         'no_room',
         'size_room',
@@ -44,18 +44,18 @@ class Room extends Model
 
             // 2. Cari kamar terakhir yang terdaftar di kost tersebut
             $latestRoom = static::where('kost_id', $room->kost_id)
-                ->orderBy('id_room', 'desc')
+                ->orderBy('room_id', 'desc')
                 ->first();
 
             if (! $latestRoom) {
                 // Jika ini adalah kamar pertama di kost tersebut
-                $room->id_room = $kostNumber . '-01';
+                $room->room_id = $kostNumber . '-01';
             } else {
                 // Mengambil 2 digit angka urutan terakhir (Misal '0001-01' diambil 1)
-                $nextSequence = intval(substr($latestRoom->id_room, 5)) + 1;
+                $nextSequence = intval(substr($latestRoom->room_id, 5)) + 1;
                 
                 // Format kembali menjadi 0001-02, 0001-03, dst.
-                $room->id_room = $kostNumber . '-' . str_pad($nextSequence, 2, '0', STR_PAD_LEFT);
+                $room->room_id = $kostNumber . '-' . str_pad($nextSequence, 2, '0', STR_PAD_LEFT);
             }
         });
     }
@@ -65,6 +65,6 @@ class Room extends Model
      */
     public function kost()
     {
-        return $this->belongsTo(Kost::class, 'kost_id', 'id_kost');
+        return $this->belongsTo(Kost::class, 'kost_id', 'kost_id');
     }
 }

@@ -83,13 +83,14 @@ class KostController extends Controller
      */
     public function edit(string $id)
     {
+        // Mengambil data kost beserta pemilik dan kamar terkait
         $kost = Kost::with(['owner.user', 'rooms'])->where('kost_id', $id)->firstOrFail();
 
+        // Jika Anda memerlukan daftar semua owner untuk dropdown (opsional)
         $owners = Owner::with('user')->get();
 
         return view('admin.pages.kost.edit-kost', compact('kost', 'owners'));
     }
-
     /**
      * Update the specified resource in storage.
      */

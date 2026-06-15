@@ -9,8 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('rooms', function (Blueprint $table) {
-            // id_room sebagai primary key berformat string (Contoh: 0001-01)
-            $table->string('id_room')->primary();
+            // room_id sebagai primary key berformat string (Contoh: 0001-01)
+            $table->string('room_id')->primary();
             
             // Relasi ke tabel kosts (Foreign key menggunakan string kost_id)
             $table->string('kost_id');

@@ -60,8 +60,6 @@ class Kost extends Model
         });
     }
 
-    // Di App\Models\Kost.php
-
     public function getImagesAttribute()
     {
         $images = json_decode($this->img_kost, true);
@@ -82,4 +80,57 @@ class Kost extends Model
     {
         return $this->belongsTo(Owner::class, 'owner_id', 'owner_id');
     }
+
+    public function rooms()
+    {
+        return $this->hasMany(Room::class, 'kost_id', 'kost_id');
+    }
 }
+
+// {{-- Form Input Kamar --}}
+//                     <div class="flex-1 space-y-4">
+//                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+//                             <div>
+//                                 <label class="block text-sm font-bold text-slate-700 mb-1">Nomor Kamar</label>
+//                                 <div class="flex gap-2 mb-2">
+//                                     <span
+//                                         class="bg-amber-400 text-white text-xs font-bold px-3 py-1 rounded-md flex items-center gap-1">101
+//                                         <i class="fa-solid fa-xmark cursor-pointer"></i></span>
+//                                     <span
+//                                         class="bg-amber-400 text-white text-xs font-bold px-3 py-1 rounded-md flex items-center gap-1">102
+//                                         <i class="fa-solid fa-xmark cursor-pointer"></i></span>
+//                                 </div>
+//                                 <div class="flex gap-2">
+//                                     <input type="text" placeholder="Ketik nomor kamar..."
+//                                         class="w-full p-2 text-sm border border-slate-200 rounded-lg outline-none focus:border-slate-900">
+//                                     <button class="bg-[#0F172A] text-white px-3 rounded-lg cursor-pointer"><i
+//                                             class="fa-solid fa-plus"></i></button>
+//                                 </div>
+//                             </div>
+//                             <div>
+//                                 <label class="block text-sm font-bold text-slate-700 mb-1">Ukuran Kamar</label>
+//                                 <input type="text" placeholder="3x4"
+//                                     class="w-full p-2 text-sm border border-slate-200 rounded-lg outline-none focus:border-slate-900">
+//                             </div>
+//                         </div>
+
+//                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+//                             <div>
+//                                 <label class="block text-sm font-bold text-slate-700 mb-1">Harga / Bulan</label>
+//                                 <input type="number" placeholder="Rp"
+//                                     class="w-full p-2 text-sm border border-slate-200 rounded-lg outline-none focus:border-slate-900">
+//                             </div>
+//                             <div>
+//                                 <label class="block text-sm font-bold text-slate-700 mb-1">Harga / Tahun (Opsional)</label>
+//                                 <input type="number" placeholder="Rp"
+//                                     class="w-full p-2 text-sm border border-slate-200 rounded-lg outline-none focus:border-slate-900">
+//                             </div>
+//                         </div>
+
+//                         <div>
+//                             <label class="block text-sm font-bold text-slate-700 mb-1">Deskripsi
+//                                 Tambahan</label>
+//                             <input type="text" placeholder="Contoh: Jendela menghadap taman depan"
+//                                 class="w-full p-2 text-sm border border-slate-200 rounded-lg outline-none focus:border-slate-900">
+//                         </div>
+//                     </div>
