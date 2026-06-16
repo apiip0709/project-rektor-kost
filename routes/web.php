@@ -6,7 +6,7 @@ use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\KostController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SuperadminController;
-use app\Http\Controllers\RoomController;
+use App\Http\Controllers\RoomController;
 use Illuminate\Support\Facades\Route;
 
 // 🟢 AKSES UMUM (Pengunjung biasa / Belum Login)
@@ -56,7 +56,7 @@ Route::middleware('auth')->group(function () {
             // 2. Rute Aksi Sisanya (Show, Edit, Update, Delete) dihandle oleh masing-masing Controller,
             Route::resource('user', UserController::class)->except(['index', 'show']);
             Route::resource('kost', KostController::class)->except(['index']);
-            Route::resource('room', RoomController::class)->except(['index']);
+            Route::post('kost/room/{kost_id}', [KostController::class, 'storeRoom'])->name('kost.storeRoom');
             Route::resource('owner', OwnerController::class)->except(['index']);
             Route::put('/owner/{owner_id}/update-status', [OwnerController::class, 'updateStatus'])->name('owner.updateStatus');
         });

@@ -18,12 +18,14 @@ class Room extends Model
         'room_id',
         'kost_id',
         'no_room',
+        'type_room',
         'size_room',
-        'floor_room',
-        'status',
         'price',
+        'price_year',
         'description',
         'img_room',
+        'floor_room',
+        'status',
     ];
 
     /**
@@ -39,23 +41,29 @@ class Room extends Model
     protected static function booted()
     {
         static::creating(function ($room) {
-            // 1. Ambil 4 digit angka belakang dari id_kost (Misal 'RK-0001' diambil '0001')
-            $kostNumber = substr($room->kost_id, 3);
+            // Jika room_id belum diisi secara manual, baru kita generate
+            if (empty($room->room_id)) {
+                // 1. Ambil digit setelah prefix (misal RK-0001 -> 0001)
+                $prefixPos = strpos($room->kost_id, '-') + 1;
+                $kostNumber = substr($room->kost_id, $prefixPos);
 
-            // 2. Cari kamar terakhir yang terdaftar di kost tersebut
-            $latestRoom = static::where('kost_id', $room->kost_id)
-                ->orderBy('room_id', 'desc')
-                ->first();
+                // 2. Cari ID tertinggi untuk kost ini
+                $latestRoom = static::where('kost_id', $room->kost_id)
+                    ->orderBy('room_id', 'desc')
+                    ->first();
 
-            if (! $latestRoom) {
-                // Jika ini adalah kamar pertama di kost tersebut
-                $room->room_id = $kostNumber . '-01';
-            } else {
-                // Mengambil 2 digit angka urutan terakhir (Misal '0001-01' diambil 1)
-                $nextSequence = intval(substr($latestRoom->room_id, 5)) + 1;
-                
-                // Format kembali menjadi 0001-02, 0001-03, dst.
-                $room->room_id = $kostNumber . '-' . str_pad($nextSequence, 2, '0', STR_PAD_LEFT);
+                // Format penambahan RM di sini
+                if (!$latestRoom) {
+                    // Hasil: RM-0001-01
+                    $room->room_id = 'RM-' . $kostNumber . '-01';
+                } else {
+                    // Ambil bagian setelah tanda '-' terakhir (mengabaikan RM-)
+                    $lastSequence = intval(substr($latestRoom->room_id, strrpos($latestRoom->room_id, '-') + 1));
+                    $nextSequence = $lastSequence + 1;
+
+                    // Hasil: RM-0001-02, dst.
+                    $room->room_id = 'RM-' . $kostNumber . '-' . str_pad($nextSequence, 2, '0', STR_PAD_LEFT);
+                }
             }
         });
     }

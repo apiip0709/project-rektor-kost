@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="max-w-7xl mx-auto">
-        {{-- Notifikasi Sukses --}}
+        {{-- Pesan Sukses --}}
         @if (session('success'))
             <div id="success-alert"
                 class="bg-emerald-50 border-l-4 border-emerald-500 text-emerald-700 p-4 rounded-lg shadow-sm flex justify-between items-center mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
@@ -12,6 +12,20 @@
                 </div>
                 <button onclick="document.getElementById('success-alert').remove()"
                     class="text-emerald-600 hover:text-emerald-800 cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        @endif
+        {{-- Pesan Error (dari Controller atau Validasi) --}}
+        @if (session('error'))
+            <div id="error-alert"
+                class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-sm mb-6 animate-in fade-in slide-in-from-top-2 duration-300 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <p class="text-sm font-medium">{{ session('error') }}</p>
+                </div>
+                <button onclick="document.getElementById('error-alert').remove()"
+                    class="text-red-600 hover:text-red-800 cursor-pointer">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
