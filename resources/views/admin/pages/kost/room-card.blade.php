@@ -96,7 +96,7 @@
         });
         lantaiCount = lantais.length;
     }
-
+    // Tambah Lantai
     function addLantai() {
         lantaiCount++;
         const html = `
@@ -112,7 +112,7 @@
         </div>`;
         document.getElementById('lantai-wrapper').insertAdjacentHTML('beforeend', html);
     }
-
+    // Tambah Tipe Kamar
     function addTipeKamar(lantaiId) {
         const template = document.getElementById('kamar-template');
         const clone = template.content.cloneNode(true);
@@ -152,7 +152,7 @@
     // Delegasi Event untuk Foto
     document.addEventListener('click', e => {
         if (e.target.closest('.btn-upload')) e.target.closest('.kamar-row').querySelector('.file-input')
-    .click();
+            .click();
     });
 
     document.addEventListener('change', e => {
@@ -171,6 +171,41 @@
                 };
                 reader.readAsDataURL(file);
             });
+        }
+    });
+
+    // Delegasi Event untuk Tambah Nomor Kamar
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('btn-tambah-nomor')) {
+            const container = e.target.closest('.nomor-kamar-wrapper');
+            const input = container.querySelector('.input-nomor');
+            const val = input.value.trim();
+
+            if (val !== "") {
+                addBadge(container, val);
+                input.value = ''; // Reset input
+            }
+        }
+    });
+
+    // Fungsi untuk membuat badge
+    function addBadge(container, value) {
+        const badgesContainer = container.querySelector('.badges-container');
+        const badge = document.createElement('div');
+        badge.className = "flex items-center gap-1 bg-amber-400 px-3 py-1 rounded-lg text-sm font-medium";
+        badge.innerHTML = `
+        <span>${value}</span>
+        <button type="button" class="hover:text-white cursor-pointer" onclick="this.parentElement.remove()">&times;</button>
+        <input type="hidden" name="nomor_kamar[]" value="${value}">
+    `;
+        badgesContainer.appendChild(badge);
+    }
+
+    // Tambahkan fitur tekan Enter untuk tambah
+    document.addEventListener('keydown', function(e) {
+        if (e.target.classList.contains('input-nomor') && e.key === 'Enter') {
+            e.preventDefault();
+            e.target.nextElementSibling.click(); // Trigger tombol +
         }
     });
 </script>

@@ -42,12 +42,17 @@
 
     {{-- Kanan: Form --}}
     <div class="md:col-span-3 space-y-4">
-        <div>
-            <label for="nomor_{{ $uid }}"
-                class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nomor Kamar</label>
-            <input type="text" id="nomor_{{ $uid }}" name="nomor_kamar[]" value="{{ $kamar->nomor ?? '' }}"
-                placeholder="Ketik nomor kamar..."
-                class="w-full text-sm border border-slate-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-slate-900 transition">
+        <div class="nomor-kamar-wrapper space-y-2">
+            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nomor Kamar</label>
+
+            <div class="badges-container flex flex-wrap gap-2 mb-2"></div>
+
+            <div class="flex gap-2">
+                <input type="text" placeholder="Ketik nomor kamar..."
+                    class="input-nomor w-full text-sm border border-slate-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-slate-900 transition">
+                <button type="button"
+                    class="btn-tambah-nomor cursor-pointer bg-slate-900 text-white px-4 rounded-xl font-bold">+</button>
+            </div>
         </div>
 
         <div>
@@ -83,4 +88,3 @@
         </div>
     </div>
 </div>
-
