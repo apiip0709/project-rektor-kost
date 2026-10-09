@@ -63,23 +63,27 @@ Route::middleware('auth')->group(function () {
     });
 
     // ─── KELOMPOK ROLE: TEKNISI (Role baru Anda dari tabel users) ───
-    Route::middleware('role:teknisi')->prefix('teknisi')->name('teknisi.')->group(function () {
-        Route::get('/dashboard', function () {
-            return "Halaman Dashboard Teknisi";
-        })->name('dashboard');
+    Route::middleware('role:teknisi')->group(function () {
+
+        Route::get('/dashboard-teknisi', function () {
+            return view('teknisi.pages.dashboard');
+        })->name('teknisi.dashboard');
+
+        Route::prefix('teknisi')->name('teknisi.')->group(function () {
+            // Resource route untuk kost (sudah otomatis mencakup index, create, edit, update, dll.)
+            Route::resource('kost', KostController::class)->except(['destroy']);
+            Route::post('kost/room/{kost_id}', [KostController::class, 'storeRoom'])->name('kost.storeRoom');
+        });
     });
 
     // ─── KELOMPOK ROLE: PEMILIK KOST ───
     Route::middleware('role:pemilik')->prefix('owner')->name('owner.')->group(function () {
-        Route::get('/dashboard', function () {
+        Route::get('/dashboard-pemilik', function () {
             return view('owner.pages.dashboard');
         })->name('dashboard');
 
-        // 🌟 KUNCI PERUBAHAN: Pasang Resource Kost & Room untuk Pemilik di sini
-        // Menggunakan Controller yang sama dengan Superadmin, tapi URL-nya nanti /owner/kost
         Route::resource('kost', KostController::class);
 
-        // Route manual Anda untuk kamar bisa pelan-pelan dialihkan ke Resource di atas agar CRUD-nya otomatis
         Route::get('/kelola-kamar', function () {
             return view('owner.pages.kelola-room');
         })->name('kelola');

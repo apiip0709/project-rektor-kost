@@ -36,7 +36,7 @@ class DatabaseSeeder extends Seeder
             'email'           => 'afifalhaq777@gmail.com',
             'password'        => 'apiip777',
             'register_method' => 'google',
-            'role'            => 'pengguna',
+            'role'            => 'pemilik',
         ]);
 
         User::create([
@@ -45,7 +45,7 @@ class DatabaseSeeder extends Seeder
             'phone'           => '089695096085',
             'password'        => 'apiip777',
             'register_method' => 'whatsapp',
-            'role'            => 'pengguna',
+            'role'            => 'teknisi',
         ]);
 
         User::create([
@@ -54,7 +54,7 @@ class DatabaseSeeder extends Seeder
             'email'           => 'kaiapart01@gmail.com',
             'password'        => 'apiip777',
             'register_method' => 'google',
-            'role'            => 'pengguna',
+            'role'            => 'teknisi',
         ]);
     }
 }

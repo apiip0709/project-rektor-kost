@@ -9,9 +9,36 @@ use App\Models\Owner;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth; // Tambahkan facade Auth
 
 class KostController extends Controller
 {
+    public function index()
+    {
+        // Ambil data kost dari database
+        $kosts = Kost::all();
+
+        // Cek role untuk menentukan tampilan view yang dipanggil
+        $user = Auth::user();
+        if ($user && $user->role === 'teknisi') {
+            return view('teknisi.pages.kost.index-kost', compact('kosts'));
+        }
+
+        return view('admin.pages.kost.index-kost', compact('kosts'));
+    }
+    
+    private function getRolePrefix()
+    {
+        $user = Auth::user();
+
+        // Jika user adalah teknisi, arahkan ke route teknisi, selain itu ke superadmin
+        if ($user && $user->role === 'teknisi') {
+            return 'teknisi.kost';
+        }
+
+        return 'superadmin.kost';
+    }
+
     public function create(Request $request)
     {
         $ownerId = $request->query('owner_id');
@@ -19,6 +46,12 @@ class KostController extends Controller
         $selectedOwner = null;
         if ($ownerId) {
             $selectedOwner = Owner::where('owner_id', $ownerId)->first();
+        }
+
+        // Tentukan view berdasarkan role (opsional, atau buat file view terpisah jika foldernya beda)
+        $user = Auth::user();
+        if ($user && $user->role === 'teknisi') {
+            return view('teknisi.pages.kost.create-kost', compact('selectedOwner'));
         }
 
         return view('admin.pages.kost.create-kost', compact('selectedOwner'));
@@ -31,8 +64,8 @@ class KostController extends Controller
             'name_kost'       => 'required|string|max:255',
             'klasifikasi'     => 'required',
             'city'            => 'required',
-            'campuses_data'   => 'required', // Harus sesuai dengan name di form
-            'facilities_data' => 'required', // Harus sesuai dengan name di form
+            'campuses_data'   => 'required',
+            'facilities_data' => 'required',
             'address'         => 'required',
             'img_kost'        => 'required',
             'img_kost.*'      => 'image|mimes:jpeg,png,jpg|max:2048',
@@ -50,26 +83,26 @@ class KostController extends Controller
         }
 
         // 3. Simpan ke Database
-        // Karena kita mengirim data sebagai JSON dari input hidden,
-        // kita simpan langsung apa adanya atau di-decode sesuai kebutuhan database Anda
         Kost::create([
             'owner_id'         => $request->owner_id,
             'name_kost'        => $request->name_kost,
             'klasifikasi'      => $request->klasifikasi,
             'city'             => $request->city,
-            'campus'           => $request->campuses_data, // Sesuai dengan field di form
-            'facility'         => $request->facilities_data, // Sesuai dengan field di form
+            'campus'           => $request->campuses_data,
+            'facility'         => $request->facilities_data,
             'address'          => $request->address,
             'description'      => $request->description,
-            'img_kost'         => json_encode($imagePaths), // Pastikan formatnya sesuai (JSON atau String)
+            'img_kost'         => json_encode($imagePaths),
             'latitude'         => $request->latitude,
             'longitude'        => $request->longitude,
             'status_langganan' => 'silver',
             'status_kemitraan' => 'aktif',
         ]);
 
-        // 4. Redirect ke halaman index dengan pesan sukses
-        return redirect()->route('superadmin.kost.index')
+        // 4. Redirect dinamis berdasarkan role
+        $routePrefix = $this->getRolePrefix();
+
+        return redirect()->route("{$routePrefix}.index")
             ->with('success', 'Data properti berhasil ditambahkan!');
     }
 
@@ -88,23 +121,26 @@ class KostController extends Controller
     {
         // Mengambil data kost beserta pemilik dan kamar terkait
         $kost = Kost::with(['owner.user', 'rooms'])->where('kost_id', $id)->firstOrFail();
-
-        // Jika Anda memerlukan daftar semua owner untuk dropdown (opsional)
         $owners = Owner::with('user')->get();
+
+        // Tentukan view edit berdasarkan role
+        $user = Auth::user();
+        if ($user && $user->role === 'teknisi') {
+            return view('teknisi.pages.kost.edit-kost', compact('kost', 'owners'));
+        }
 
         return view('admin.pages.kost.edit-kost', compact('kost', 'owners'));
     }
 
     public function update(Request $request, $id)
     {
-        // Menggunakan kost_id sebagai acuan (sesuai alur sebelumnya)
         $kost = Kost::where('kost_id', $id)->firstOrFail();
 
         // 1. Validasi Input
         $request->validate([
-            'name_kost'    => 'required|string|max:255',
-            'img_kost.*'   => 'image|mimes:jpeg,png,jpg|max:2048',
-            'removed_images' => 'nullable|string', // Tambahkan validasi untuk keamanan
+            'name_kost'      => 'required|string|max:255',
+            'img_kost.*'     => 'image|mimes:jpeg,png,jpg|max:2048',
+            'removed_images' => 'nullable|string',
         ]);
 
         // 2. Handle Gambar (Hapus)
@@ -113,12 +149,10 @@ class KostController extends Controller
 
         if (!empty($removedImages)) {
             foreach ($removedImages as $path) {
-                // Pastikan hanya menghapus jika path valid dan ada
                 if (Storage::disk('public')->exists($path)) {
                     Storage::disk('public')->delete($path);
                 }
             }
-            // Filter array gambar yang tersisa
             $currentImages = array_values(array_diff($currentImages, $removedImages));
         }
 
@@ -144,8 +178,10 @@ class KostController extends Controller
             'img_kost'     => json_encode($currentImages),
         ]);
 
-        // 5. Redirect dengan pesan sukses
-        return redirect()->route('superadmin.kost.edit', ['kost' => $id])
+        // 5. Redirect dinamis berdasarkan role
+        $routePrefix = $this->getRolePrefix();
+
+        return redirect()->route("{$routePrefix}.edit", ['kost' => $id])
             ->with('success', 'Data properti berhasil diperbarui!');
     }
 
@@ -158,6 +194,8 @@ class KostController extends Controller
             'ukuran_kamar'  => 'required|array',
             'harga_bulan'   => 'required|array',
         ]);
+
+        $routePrefix = $this->getRolePrefix();
 
         try {
             DB::transaction(function () use ($request, $kost) {
@@ -172,8 +210,6 @@ class KostController extends Controller
                     $imgPaths = $this->uploadRoomImages($request, $uid);
 
                     foreach ($nomor_kamar_list as $nomor) {
-                        // Karena sudah ada booted, kita cukup gunakan identitas unik
-                        // yang sudah ada di database (kost_id + no_room)
                         Room::updateOrCreate(
                             [
                                 'kost_id' => $kost->kost_id,
@@ -193,11 +229,11 @@ class KostController extends Controller
                 }
             });
 
-            return redirect()->route('superadmin.kost.edit', ['kost' => $id])
+            return redirect()->route("{$routePrefix}.edit", ['kost' => $id])
                 ->with('success', 'Data kamar berhasil disimpan!');
         } catch (\Exception $e) {
             Log::error('Gagal simpan kamar: ' . $e->getMessage());
-            return redirect()->route('superadmin.kost.edit', ['kost' => $id])
+            return redirect()->route("{$routePrefix}.edit", ['kost' => $id])
                 ->with('error', 'Terjadi kesalahan sistem.');
         }
     }

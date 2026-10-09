@@ -52,9 +52,19 @@ class LoginController extends Controller
 
             $user = Auth::user();
 
-            if ($user->role === 'superadmin' || $user->role === 'admin') {
+            if ($user->role === 'superadmin') {
                 return redirect()->intended(route('superadmin.dashboard'))
                     ->with('success', 'Selamat datang Admin!');
+            }
+
+            if ($user->role === 'teknisi') {
+                return redirect()->intended(route('teknisi.dashboard')) // Sesuaikan nama route-nya
+                    ->with('success', 'Selamat datang Teknisi!');
+            }
+
+            if ($user->role === 'pemilik') {
+                return redirect()->intended(route('owner.dashboard')) // Sesuaikan nama route-nya
+                    ->with('success', 'Selamat datang Pemilik!');
             }
 
             return redirect()->intended(route('home'))
@@ -104,7 +114,7 @@ class LoginController extends Controller
             $request->session()->regenerate();
 
             // SINKRONISASI: Arahkan ke dashboard jika admin, atau home jika user biasa
-            if ($user->role === 'superadmin' || $user->role === 'admin') {
+            if ($user->role === 'superadmin') {
                 return redirect()->route('superadmin.dashboard')->with('success', 'Berhasil masuk sebagai Admin!');
             }
 
@@ -161,7 +171,7 @@ class LoginController extends Controller
         $request->session()->regenerate(); // Tambahkan regenerasi session demi keamanan
 
         // SINKRONISASI RUTE REDIRECT
-        if ($user->role === 'superadmin' || $user->role === 'admin') {
+        if ($user->role === 'superadmin') {
             return redirect()->route('superadmin.dashboard');
         }
 

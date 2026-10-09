@@ -29,8 +29,8 @@ class CheckRole
         // 3. Jika tidak punya akses, arahkan ke halaman yang sesuai role-nya (mencegah bug/kesasar)
         return match ($user->role) {
             'superadmin' => redirect()->route('superadmin.dashboard')->with('error', 'Anda tidak memiliki akses ke halaman tersebut.'),
-            'admin'      => redirect()->route('admin.dashboard')->with('error', 'Anda tidak memiliki akses ke halaman tersebut.'),
-            'pemilik'    => redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses ke halaman tersebut.'),
+            'pemilik'    => redirect()->route('owner.dashboard')->with('error', 'Anda tidak memiliki akses ke halaman tersebut.'),
+            'teknisi'    => redirect()->route('teknisi.dashboard')->with('error', 'Anda tidak memiliki akses ke halaman tersebut.'),
             default      => redirect()->route('home')->with('error', 'Anda tidak memiliki akses ke halaman tersebut.'),
         };
     }
